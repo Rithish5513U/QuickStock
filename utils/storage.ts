@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+/* small change */
+
 export interface Product {
   id: string;
   name: string;
