@@ -5,9 +5,8 @@ export interface Product {
   name: string;
   category: string;
   currentStock: number;
-  price: number;
-  buyingPrice?: number;
-  sellingPrice?: number;
+  buyingPrice: number;
+  sellingPrice: number;
   minStock: number;
   criticalStock: number;
   sku?: string;

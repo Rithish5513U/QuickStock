@@ -104,7 +104,7 @@ export default function BillScreen() {
     scannedItems.forEach((qty, productId) => {
       const product = products.find(p => p.id === productId);
       if (product) {
-        const price = product.sellingPrice || product.price;
+        const price = product.sellingPrice;
         subtotal += price * qty;
       }
     });
@@ -144,7 +144,7 @@ export default function BillScreen() {
     scannedItems.forEach((qty, productId) => {
       const product = products.find(p => p.id === productId);
       if (product) {
-        const price = product.sellingPrice || product.price;
+        const price = product.sellingPrice;
         items.push({
           productId: product.id,
           productName: product.name,

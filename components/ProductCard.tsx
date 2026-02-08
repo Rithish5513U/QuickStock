@@ -67,7 +67,7 @@ export default function ProductCard({ product, onEdit, onDelete, onPress }: Prod
               <View style={styles.productDetailItem}>
                 <Typography variant="caption" color={Colors.textLight}>Price</Typography>
                 <Typography variant="body" style={styles.productDetailValue}>
-                  ${product.price.toFixed(2)}
+                  ${product.buyingPrice.toFixed(2)}
                 </Typography>
               </View>
               <View style={styles.productActions}>

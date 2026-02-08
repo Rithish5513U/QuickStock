@@ -67,7 +67,7 @@ export default function ProductsListScreen() {
     return matchesSearch && matchesCategory && matchesStock;
   }).sort((a, b) => {
     if (sortBy === 'name') return a.name.localeCompare(b.name);
-    if (sortBy === 'price') return a.price - b.price;
+    if (sortBy === 'price') return a.buyingPrice - b.buyingPrice;
     if (sortBy === 'stock') return b.currentStock - a.currentStock;
     return 0;
   });

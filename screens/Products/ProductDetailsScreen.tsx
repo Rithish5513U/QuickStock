@@ -147,7 +147,7 @@ export default function ProductDetailsScreen() {
             </View>
             <View style={styles.infoItem}>
               <Typography variant="caption" color={Colors.textLight}>Price</Typography>
-              <Typography variant="h3" style={styles.infoValue}>${product.price.toFixed(2)}</Typography>
+              <Typography variant="h3" style={styles.infoValue}>${product.buyingPrice.toFixed(2)}</Typography>
             </View>
           </View>
           <View style={styles.divider} />

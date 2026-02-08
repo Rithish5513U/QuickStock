@@ -61,19 +61,19 @@ export default function DashboardScreen({ navigation }: any) {
       
       // Calculate stats
       const totalProducts = products.length;
-      const totalStockValue = products.reduce((sum, p) => sum + (p.currentStock * p.price), 0);
+      const totalStockValue = products.reduce((sum, p) => sum + (p.currentStock * p.buyingPrice), 0);
       
       // Calculate profit and revenue
       // Using sellingPrice - buyingPrice for profit calculation
       // Assuming selling price is the 'price' field and buying price is 80% of price if not set
       const totalProfit = products.reduce((sum, p) => {
-        const selling = p.sellingPrice || p.price;
-        const buying = p.buyingPrice || p.price * 0.8;
+        const selling = p.sellingPrice;
+        const buying = p.buyingPrice;
         return sum + ((selling - buying) * p.currentStock);
       }, 0);
       
       const totalRevenue = products.reduce((sum, p) => {
-        const selling = p.sellingPrice || p.price;
+        const selling = p.sellingPrice;
         return sum + (selling * p.currentStock);
       }, 0);
       
@@ -125,8 +125,8 @@ export default function DashboardScreen({ navigation }: any) {
         weekStart.setDate(productDate.getDate() - productDate.getDay());
         const weekKey = weekStart.toISOString().split('T')[0];
         
-        const selling = p.sellingPrice || p.price;
-        const buying = p.buyingPrice || p.price * 0.8;
+        const selling = p.sellingPrice;
+        const buying = p.buyingPrice;
         const revenue = selling * p.currentStock;
         const profit = (selling - buying) * p.currentStock;
         
