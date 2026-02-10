@@ -10,7 +10,10 @@ import ProductsListScreen from './screens/Products/ProductsListScreen';
 import AddEditProductScreen from './screens/Products/AddEditProductScreen';
 import ProductDetailsScreen from './screens/Products/ProductDetailsScreen';
 import BillScreen from './screens/Bill/BillScreen';
-import StockScreen from './screens/Stock/StockScreen';
+import InvoiceHistoryScreen from './screens/Bill/InvoiceHistoryScreen';
+import SelectProductScreen from './screens/Bill/SelectProductScreen';
+import CustomerAnalyticsScreen from './screens/Customers/CustomerAnalyticsScreen';
+import CustomerDetailsScreen from './screens/Customers/CustomerDetailsScreen';
 import MoreScreen from './screens/More/MoreScreen';
 import Icon from './components/Icon';
 import { Colors } from './constants/colors';
@@ -57,6 +60,9 @@ export default function App() {
         <Stack.Screen name="MainTabs" component={MainTabs} />
         <Stack.Screen name="AddEditProduct" component={AddEditProductScreen} />
         <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} />
+        <Stack.Screen name="InvoiceHistory" component={InvoiceHistoryScreen} />
+        <Stack.Screen name="SelectProduct" component={SelectProductScreen} />
+        <Stack.Screen name="CustomerDetails" component={CustomerDetailsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -76,8 +82,8 @@ function MainTabs() {
             iconName = 'shopping-bag-filled';
           } else if (route.name === 'Bill') {
             iconName = 'create';
-          } else if (route.name === 'Stock') {
-            iconName = 'add';
+          } else if (route.name === 'Customers') {
+            iconName = 'user';
           } else if (route.name === 'More') {
             iconName = 'hamburger-menu';
           }
@@ -115,7 +121,7 @@ function MainTabs() {
           },
         }}
       />
-      <Tab.Screen name="Stock" component={StockScreen} />
+      <Tab.Screen name="Customers" component={CustomerAnalyticsScreen} />
       <Tab.Screen name="More" component={MoreScreen} />
     </Tab.Navigator>
   );

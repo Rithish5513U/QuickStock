@@ -10,41 +10,44 @@ import Typography from '../../components/Typography';
 import Icon from '../../components/Icon';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
-import EmptyState from '../../components/EmptyState';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
 import { getProducts, saveProduct, Product } from '../../utils/storage';
-import { getInvoices, saveInvoice, deleteInvoice, Invoice, InvoiceItem } from '../../utils/invoiceStorage';
+import { saveInvoice, Invoice, InvoiceItem } from '../../utils/invoiceStorage';
 import { getCustomers, saveCustomer, Customer } from '../../utils/customerStorage';
 
-export default function BillScreen() {
+export default function BillScreen({ navigation, route }: any) {
   const [permission, requestPermission] = useCameraPermissions();
   const [products, setProducts] = useState<Product[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [scannedItems, setScannedItems] = useState<Map<string, number>>(new Map());
   const [showScanner, setShowScanner] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showInvoicePreview, setShowInvoicePreview] = useState(false);
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [currentInvoice, setCurrentInvoice] = useState<Invoice | null>(null);
+  const [customerPhone, setCustomerPhone] = useState('');
   const [newCustomerName, setNewCustomerName] = useState('');
-  const [newCustomerPhone, setNewCustomerPhone] = useState('');
-  const [customerSearch, setCustomerSearch] = useState('');
   const [scanned, setScanned] = useState(false);
+  const [customerStep, setCustomerStep] = useState<'phone' | 'name'>('phone');
 
   useFocusEffect(
     React.useCallback(() => {
       loadData();
-    }, [])
+      
+      // Check if a product was selected
+      if (route.params?.selectedProduct) {
+        const selectedProduct = route.params.selectedProduct;
+        handleSelectProduct(selectedProduct);
+        // Clear the param
+        navigation.setParams({ selectedProduct: undefined });
+      }
+    }, [route.params?.selectedProduct])
   );
 
   const loadData = async () => {
     const loadedProducts = await getProducts();
-    const loadedInvoices = await getInvoices();
     const loadedCustomers = await getCustomers();
     setProducts(loadedProducts);
-    setInvoices(loadedInvoices);
     setCustomers(loadedCustomers);
   };
 
@@ -74,10 +77,50 @@ export default function BillScreen() {
     setTimeout(() => setScanned(false), 2000);
   };
 
+  const handleSelectProduct = (product: Product) => {
+    if (product.currentStock === 0) {
+      Alert.alert('Out of Stock', `${product.name} is out of stock`);
+      return;
+    }
+    const currentQty = scannedItems.get(product.id) || 0;
+    if (currentQty < product.currentStock) {
+      const newItems = new Map(scannedItems);
+      newItems.set(product.id, currentQty + 1);
+      setScannedItems(newItems);
+    } else {
+      Alert.alert('Out of Stock', `Only ${product.currentStock} available`);
+    }
+  };
+
   const handleRemoveItem = (productId: string) => {
     const newItems = new Map(scannedItems);
     newItems.delete(productId);
     setScannedItems(newItems);
+  };
+
+  const handleIncrementItem = (productId: string) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    const currentQty = scannedItems.get(productId) || 0;
+    if (currentQty < product.currentStock) {
+      const newItems = new Map(scannedItems);
+      newItems.set(productId, currentQty + 1);
+      setScannedItems(newItems);
+    } else {
+      Alert.alert('Out of Stock', `Only ${product.currentStock} available`);
+    }
+  };
+
+  const handleDecrementItem = (productId: string) => {
+    const currentQty = scannedItems.get(productId) || 0;
+    if (currentQty > 1) {
+      const newItems = new Map(scannedItems);
+      newItems.set(productId, currentQty - 1);
+      setScannedItems(newItems);
+    } else {
+      handleRemoveItem(productId);
+    }
   };
 
   const handleQuantityChange = (productId: string, qty: string) => {
@@ -101,39 +144,60 @@ export default function BillScreen() {
 
   const calculateTotals = () => {
     let subtotal = 0;
+    let profit = 0;
     scannedItems.forEach((qty, productId) => {
       const product = products.find(p => p.id === productId);
       if (product) {
         const price = product.sellingPrice;
+        const cost = product.buyingPrice;
         subtotal += price * qty;
+        profit += (price - cost) * qty;
       }
     });
     const tax = subtotal * 0.1;
-    return { subtotal, tax, total: subtotal + tax };
+    return { subtotal, tax, total: subtotal + tax, profit };
+  };
+
+  const handleProceedToBill = () => {
+    if (scannedItems.size === 0) {
+      Alert.alert('No Items', 'Please add items first');
+      return;
+    }
+    setCustomerStep('phone');
+    setCustomerPhone('');
+    setNewCustomerName('');
+    setShowCustomerModal(true);
+  };
+
+  const handlePhoneSubmit = async () => {
+    if (!customerPhone.trim()) {
+      Alert.alert('Error', 'Please enter phone number');
+      return;
+    }
+
+    const existingCustomer = customers.find(c => c.phone === customerPhone.trim());
+    if (existingCustomer) {
+      await createInvoice(existingCustomer);
+    } else {
+      setCustomerStep('name');
+    }
   };
 
   const handleCreateCustomer = async () => {
-    if (!newCustomerName.trim() || !newCustomerPhone.trim()) {
-      Alert.alert('Error', 'Please fill all fields');
+    if (!newCustomerName.trim()) {
+      Alert.alert('Error', 'Please enter customer name');
       return;
     }
 
     const customer: Customer = {
       id: Date.now().toString(),
       name: newCustomerName.trim(),
-      phone: newCustomerPhone.trim(),
+      phone: customerPhone.trim(),
       createdAt: new Date().toISOString(),
     };
 
     await saveCustomer(customer);
-    setNewCustomerName('');
-    setNewCustomerPhone('');
     await loadData();
-    await createInvoice(customer);
-  };
-
-  const handleSelectCustomer = async (customer: Customer) => {
-    setShowCustomerModal(false);
     await createInvoice(customer);
   };
 
@@ -145,21 +209,26 @@ export default function BillScreen() {
       const product = products.find(p => p.id === productId);
       if (product) {
         const price = product.sellingPrice;
+        const cost = product.buyingPrice;
         items.push({
           productId: product.id,
           productName: product.name,
           quantity: qty,
           price,
+          costPrice: cost,
           total: price * qty,
         });
         productsToUpdate.push({
           ...product,
           currentStock: product.currentStock - qty,
+          soldUnits: (product.soldUnits || 0) + qty,
+          revenue: (product.revenue || 0) + (price * qty),
+          profit: (product.profit || 0) + ((price - cost) * qty),
         });
       }
     });
 
-    const { subtotal, tax, total } = calculateTotals();
+    const { subtotal, tax, total, profit } = calculateTotals();
 
     const invoice: Invoice = {
       id: Date.now().toString(),
@@ -170,6 +239,7 @@ export default function BillScreen() {
       subtotal,
       tax,
       total,
+      profit,
       createdAt: new Date().toISOString(),
     };
 
@@ -179,8 +249,11 @@ export default function BillScreen() {
         await saveProduct(product);
       }
       setCurrentInvoice(invoice);
+      setShowCustomerModal(false);
       setShowInvoicePreview(true);
       setScannedItems(new Map());
+      setCustomerPhone('');
+      setNewCustomerName('');
       await loadData();
     }
   };
@@ -217,6 +290,7 @@ export default function BillScreen() {
             .totals-row { display: flex; justify-content: flex-end; margin: 5px 0; }
             .totals-row span:first-child { width: 150px; }
             .total { font-size: 18px; font-weight: bold; color: #007AFF; }
+            .profit { font-size: 14px; color: #34C759; margin-top: 10px; }
           </style>
         </head>
         <body>
@@ -232,7 +306,7 @@ export default function BillScreen() {
               <span><strong>Customer:</strong> ${invoice.customerName}</span>
             </div>
             <div class="info-row">
-              <span><strong>Phone:</strong> ${invoice.customerPhone}</span>
+              <span><strong>Phone:</strong> ${invoice.customerPhone || 'N/A'}</span>
             </div>
           </div>
           <table>
@@ -249,8 +323,8 @@ export default function BillScreen() {
                 <tr>
                   <td>${item.productName}</td>
                   <td>${item.quantity}</td>
-                  <td>₹${item.price.toFixed(2)}</td>
-                  <td>₹${item.total.toFixed(2)}</td>
+                  <td>$${item.price.toFixed(2)}</td>
+                  <td>$${item.total.toFixed(2)}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -258,15 +332,15 @@ export default function BillScreen() {
           <div class="totals">
             <div class="totals-row">
               <span>Subtotal:</span>
-              <span>₹${invoice.subtotal.toFixed(2)}</span>
+              <span>$${invoice.subtotal.toFixed(2)}</span>
             </div>
             <div class="totals-row">
               <span>Tax (10%):</span>
-              <span>₹${invoice.tax.toFixed(2)}</span>
+              <span>$${invoice.tax.toFixed(2)}</span>
             </div>
             <div class="totals-row total">
               <span>Total:</span>
-              <span>₹${invoice.total.toFixed(2)}</span>
+              <span>$${invoice.total.toFixed(2)}</span>
             </div>
           </div>
         </body>
@@ -274,47 +348,33 @@ export default function BillScreen() {
     `;
   };
 
-  const handleDeleteInvoice = (invoice: Invoice) => {
-    Alert.alert(
-      'Delete Invoice',
-      'Are you sure?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            await deleteInvoice(invoice.id);
-            await loadData();
-          },
-        },
-      ]
-    );
-  };
-
   const itemsList = Array.from(scannedItems.entries()).map(([id, qty]) => {
     const product = products.find(p => p.id === id);
     return product ? { ...product, qty } : null;
   }).filter(Boolean);
 
-  const { subtotal, tax, total } = calculateTotals();
-
-  const filteredCustomers = customers.filter(c =>
-    c.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
-    c.phone.toLowerCase().includes(customerSearch.toLowerCase())
-  );
+  const { subtotal, tax, total, profit } = calculateTotals();
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Typography variant="h2">Invoice</Typography>
-        <TouchableOpacity onPress={() => setShowHistoryModal(true)}>
+        <TouchableOpacity onPress={() => navigation.navigate('InvoiceHistory')}>
           <Icon name="inbox" size={24} />
         </TouchableOpacity>
       </View>
 
       <Card style={styles.scannerCard}>
-        <Typography variant="h3" style={styles.sectionTitle}>Scan Product Barcode</Typography>
+        <View style={styles.scannerHeader}>
+          <Typography variant="h3" style={styles.sectionTitle}>Scan Barcode</Typography>
+          <TouchableOpacity 
+            style={styles.addButton}
+            onPress={() => navigation.navigate('SelectProduct')}
+          >
+            <Icon name="add" size={18} color={Colors.white} />
+            <Typography variant="caption" style={styles.addButtonText}>Add Item</Typography>
+          </TouchableOpacity>
+        </View>
         {!showScanner ? (
           <TouchableOpacity
             style={styles.scanButton}
@@ -357,24 +417,36 @@ export default function BillScreen() {
       <ScrollView style={styles.scrollView}>
         {itemsList.length > 0 && (
           <Card style={styles.section}>
-            <Typography variant="h3" style={styles.sectionTitle}>Scanned Items ({itemsList.length})</Typography>
+            <Typography variant="h3" style={styles.sectionTitle}>Items ({itemsList.length})</Typography>
             {itemsList.map((item: any) => (
               <View key={item.id} style={styles.item}>
                 <View style={styles.itemLeft}>
                   <Typography variant="body" style={styles.itemName}>{item.name}</Typography>
                   <Typography variant="caption" color={Colors.textLight}>
-                    ₹{(item.sellingPrice || item.price).toFixed(2)} × {item.qty}
+                    ${item.sellingPrice.toFixed(2)} × {item.qty}
                   </Typography>
                 </View>
                 <View style={styles.itemRight}>
+                  <TouchableOpacity
+                    style={styles.qtyButton}
+                    onPress={() => handleDecrementItem(item.id)}
+                  >
+                    <Icon name="minus" size={16} />
+                  </TouchableOpacity>
                   <TextInput
                     style={styles.qtyInput}
                     value={item.qty.toString()}
                     onChangeText={(qty) => handleQuantityChange(item.id, qty)}
                     keyboardType="number-pad"
                   />
+                  <TouchableOpacity
+                    style={styles.qtyButton}
+                    onPress={() => handleIncrementItem(item.id)}
+                  >
+                    <Icon name="add" size={16} />
+                  </TouchableOpacity>
                   <Typography variant="body" style={styles.itemTotal}>
-                    ₹{((item.sellingPrice || item.price) * item.qty).toFixed(2)}
+                    ${(item.sellingPrice * item.qty).toFixed(2)}
                   </Typography>
                   <TouchableOpacity onPress={() => handleRemoveItem(item.id)}>
                     <Icon name="delete-bin" size={18} color={Colors.danger} />
@@ -388,15 +460,15 @@ export default function BillScreen() {
             <View style={styles.summary}>
               <View style={styles.summaryRow}>
                 <Typography variant="body">Subtotal</Typography>
-                <Typography variant="body">₹{subtotal.toFixed(2)}</Typography>
+                <Typography variant="body">${subtotal.toFixed(2)}</Typography>
               </View>
               <View style={styles.summaryRow}>
                 <Typography variant="body">Tax (10%)</Typography>
-                <Typography variant="body">₹{tax.toFixed(2)}</Typography>
+                <Typography variant="body">${tax.toFixed(2)}</Typography>
               </View>
               <View style={[styles.summaryRow, styles.totalRow]}>
                 <Typography variant="h3">Total</Typography>
-                <Typography variant="h3" color={Colors.primary}>₹{total.toFixed(2)}</Typography>
+                <Typography variant="h3" color={Colors.primary}>${total.toFixed(2)}</Typography>
               </View>
             </View>
           </Card>
@@ -405,7 +477,7 @@ export default function BillScreen() {
 
       {itemsList.length > 0 && (
         <View style={styles.footer}>
-          <Button title="Create Invoice Manually" onPress={() => setShowCustomerModal(true)} />
+          <Button title="Proceed to Bill" onPress={handleProceedToBill} />
         </View>
       )}
 
@@ -414,59 +486,55 @@ export default function BillScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Typography variant="h3">Select Customer</Typography>
+              <Typography variant="h3">Customer Details</Typography>
               <TouchableOpacity onPress={() => setShowCustomerModal(false)}>
                 <Icon name="close" size={24} />
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalBody}>
-              <Card style={styles.newCustomerSection}>
-                <Typography variant="body" style={styles.sectionTitle}>Create New Customer</Typography>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Name"
-                  value={newCustomerName}
-                  onChangeText={setNewCustomerName}
-                  placeholderTextColor={Colors.textLight}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Phone"
-                  value={newCustomerPhone}
-                  onChangeText={setNewCustomerPhone}
-                  keyboardType="phone-pad"
-                  placeholderTextColor={Colors.textLight}
-                />
-                <Button title="Create & Continue" onPress={handleCreateCustomer} />
-              </Card>
-
-              {customers.length > 0 && (
-                <>
-                  <Typography variant="body" style={styles.orText}>Or Select Existing</Typography>
+            <View style={styles.modalBody}>
+              {customerStep === 'phone' ? (
+                <Card style={styles.customerCard}>
+                  <Typography variant="body" style={styles.sectionTitle}>
+                    Enter Customer Phone Number
+                  </Typography>
                   <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search customers..."
-                    value={customerSearch}
-                    onChangeText={setCustomerSearch}
+                    style={styles.input}
+                    placeholder="Phone Number"
+                    value={customerPhone}
+                    onChangeText={setCustomerPhone}
+                    keyboardType="phone-pad"
                     placeholderTextColor={Colors.textLight}
+                    autoFocus
                   />
-                  {filteredCustomers.map(customer => (
-                    <TouchableOpacity
-                      key={customer.id}
-                      style={styles.customerItem}
-                      onPress={() => handleSelectCustomer(customer)}
-                    >
-                      <View>
-                        <Typography variant="body" style={styles.customerName}>{customer.name}</Typography>
-                        <Typography variant="caption" color={Colors.textLight}>{customer.phone}</Typography>
-                      </View>
-                      <Icon name="arrow-right" size={20} />
-                    </TouchableOpacity>
-                  ))}
-                </>
+                  <Button title="Continue" onPress={handlePhoneSubmit} />
+                </Card>
+              ) : (
+                <Card style={styles.customerCard}>
+                  <Typography variant="body" style={styles.sectionTitle}>
+                    New Customer
+                  </Typography>
+                  <Typography variant="caption" color={Colors.textLight} style={{ marginBottom: Spacing.md }}>
+                    Phone: {customerPhone}
+                  </Typography>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Customer Name"
+                    value={newCustomerName}
+                    onChangeText={setNewCustomerName}
+                    placeholderTextColor={Colors.textLight}
+                    autoFocus
+                  />
+                  <Button title="Create Invoice" onPress={handleCreateCustomer} />
+                  <Button 
+                    title="Back" 
+                    variant="outline" 
+                    onPress={() => setCustomerStep('phone')} 
+                    style={{ marginTop: Spacing.sm }}
+                  />
+                </Card>
               )}
-            </ScrollView>
+            </View>
           </View>
         </View>
       </Modal>
@@ -514,10 +582,10 @@ export default function BillScreen() {
                       <View style={{ flex: 1 }}>
                         <Typography variant="body" style={{ fontWeight: '600' }}>{item.productName}</Typography>
                         <Typography variant="caption" color={Colors.textLight}>
-                          ₹{item.price.toFixed(2)} × {item.quantity}
+                          ${item.price.toFixed(2)} × {item.quantity}
                         </Typography>
                       </View>
-                      <Typography variant="body">₹{item.total.toFixed(2)}</Typography>
+                      <Typography variant="body">${item.total.toFixed(2)}</Typography>
                     </View>
                   ))}
 
@@ -526,15 +594,15 @@ export default function BillScreen() {
                   <View style={styles.summary}>
                     <View style={styles.summaryRow}>
                       <Typography variant="body">Subtotal:</Typography>
-                      <Typography variant="body">₹{currentInvoice.subtotal.toFixed(2)}</Typography>
+                      <Typography variant="body">${currentInvoice.subtotal.toFixed(2)}</Typography>
                     </View>
                     <View style={styles.summaryRow}>
                       <Typography variant="body">Tax (10%):</Typography>
-                      <Typography variant="body">₹{currentInvoice.tax.toFixed(2)}</Typography>
+                      <Typography variant="body">${currentInvoice.tax.toFixed(2)}</Typography>
                     </View>
                     <View style={[styles.summaryRow, styles.totalRow]}>
                       <Typography variant="h3">Total:</Typography>
-                      <Typography variant="h3" color={Colors.primary}>₹{currentInvoice.total.toFixed(2)}</Typography>
+                      <Typography variant="h3" color={Colors.primary}>${currentInvoice.total.toFixed(2)}</Typography>
                     </View>
                   </View>
                 </Card>
@@ -555,65 +623,6 @@ export default function BillScreen() {
                 />
               </ScrollView>
             )}
-          </View>
-        </View>
-      </Modal>
-
-      {/* History */}
-      <Modal visible={showHistoryModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Typography variant="h3">Invoice History</Typography>
-              <TouchableOpacity onPress={() => setShowHistoryModal(false)}>
-                <Icon name="close" size={24} />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.modalBody}>
-              {invoices.length === 0 ? (
-                <EmptyState title="No invoices" message="Create your first invoice" />
-              ) : (
-                invoices.map(inv => (
-                  <Card key={inv.id} style={{ marginBottom: Spacing.md }}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setCurrentInvoice(inv);
-                        setShowHistoryModal(false);
-                        setShowInvoicePreview(true);
-                      }}
-                    >
-                      <View style={styles.invoiceHeader}>
-                        <View>
-                          <Typography variant="body" style={{ fontWeight: '600' }}>{inv.invoiceNumber}</Typography>
-                          <Typography variant="caption" color={Colors.textLight}>{inv.customerName}</Typography>
-                          <Typography variant="caption" color={Colors.textLight}>
-                            {new Date(inv.createdAt).toLocaleDateString()}
-                          </Typography>
-                        </View>
-                        <Typography variant="h3" color={Colors.primary}>₹{inv.total.toFixed(2)}</Typography>
-                      </View>
-                    </TouchableOpacity>
-                    <View style={styles.invoiceActions}>
-                      <TouchableOpacity
-                        style={styles.actionBtn}
-                        onPress={() => generatePDF(inv)}
-                      >
-                        <Icon name="send" size={16} color={Colors.primary} />
-                        <Typography variant="caption" color={Colors.primary}>PDF</Typography>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.actionBtn}
-                        onPress={() => handleDeleteInvoice(inv)}
-                      >
-                        <Icon name="delete-bin" size={16} color={Colors.danger} />
-                        <Typography variant="caption" color={Colors.danger}>Delete</Typography>
-                      </TouchableOpacity>
-                    </View>
-                  </Card>
-                ))
-              )}
-            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -643,8 +652,27 @@ const styles = StyleSheet.create({
     margin: Spacing.lg,
     marginBottom: Spacing.md,
   },
-  sectionTitle: {
+  scannerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: Spacing.md,
+  },
+  sectionTitle: {
+    fontWeight: '600',
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: 20,
+    gap: 4,
+  },
+  addButtonText: {
+    color: Colors.white,
+    fontWeight: '600',
   },
   scanButton: {
     alignItems: 'center',
@@ -692,7 +720,16 @@ const styles = StyleSheet.create({
   itemRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: Spacing.xs,
+  },
+  qtyButton: {
+    backgroundColor: Colors.background,
+    borderRadius: 6,
+    padding: Spacing.xs,
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   qtyInput: {
     backgroundColor: Colors.background,
@@ -754,7 +791,7 @@ const styles = StyleSheet.create({
   modalBody: {
     padding: Spacing.lg,
   },
-  newCustomerSection: {
+  customerCard: {
     marginBottom: Spacing.lg,
   },
   input: {
@@ -763,30 +800,6 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     marginBottom: Spacing.md,
     fontSize: 16,
-  },
-  orText: {
-    fontWeight: '600',
-    marginBottom: Spacing.md,
-    textAlign: 'center',
-  },
-  searchInput: {
-    backgroundColor: Colors.background,
-    borderRadius: 8,
-    padding: Spacing.md,
-    marginBottom: Spacing.md,
-  },
-  customerItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: Spacing.md,
-    marginBottom: Spacing.sm,
-    backgroundColor: Colors.background,
-    borderRadius: 8,
-  },
-  customerName: {
-    fontWeight: '600',
-    marginBottom: 4,
   },
   invoiceInfo: {
     marginBottom: Spacing.md,
@@ -800,28 +813,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: Spacing.sm,
-  },
-  invoiceHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.sm,
-  },
-  invoiceActions: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    marginTop: Spacing.md,
-    paddingTop: Spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: Colors.background,
-  },
-  actionBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.xs,
-    padding: Spacing.sm,
-    backgroundColor: Colors.background,
-    borderRadius: 8,
   },
 });

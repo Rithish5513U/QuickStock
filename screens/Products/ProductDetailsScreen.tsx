@@ -3,6 +3,7 @@ import { StyleSheet, View, ScrollView, TouchableOpacity, Image, Alert, ActivityI
 import { useState, useEffect } from 'react';
 import { useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
 import { getProductById, deleteProduct, Product } from '../../utils/storage';
+import { getInvoices, Invoice, InvoiceItem } from '../../utils/invoiceStorage';
 
 type RootStackParamList = {
   ProductDetails: { productId: string };
@@ -21,6 +22,7 @@ export default function ProductDetailsScreen() {
   const productId = (route.params as any)?.productId;
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [transactions, setTransactions] = useState<any[]>([]);
 
   useEffect(() => {
     loadProduct();
@@ -36,11 +38,38 @@ export default function ProductDetailsScreen() {
     const loadedProduct = await getProductById(productId);
     if (loadedProduct) {
       setProduct(loadedProduct);
+      await loadTransactions(productId);
     } else {
       Alert.alert('Error', 'Product not found');
       navigation.goBack();
     }
     setIsLoading(false);
+  };
+
+  const loadTransactions = async (prodId: string) => {
+    const allInvoices = await getInvoices();
+    
+    const productTransactions: any[] = [];
+
+    allInvoices.forEach(invoice => {
+      invoice.items.forEach(item => {
+        if (item.productId === prodId) {
+          const itemProfit = (item.price - item.costPrice) * item.quantity;
+          productTransactions.push({
+            invoiceNumber: invoice.invoiceNumber,
+            customerName: invoice.customerName,
+            quantity: item.quantity,
+            price: item.price,
+            total: item.total,
+            profit: itemProfit,
+            date: invoice.createdAt,
+          });
+        }
+      });
+    });
+
+    productTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    setTransactions(productTransactions);
   };
 
   const getStockStatus = () => {
@@ -55,6 +84,21 @@ export default function ProductDetailsScreen() {
   };
 
   const stockStatus = getStockStatus();
+
+  const formatCurrency = (amount: number) => {
+    return `$${amount.toFixed(2)}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   const handleEdit = () => {
     navigation.navigate('AddEditProduct', { product: product || undefined });
@@ -138,27 +182,58 @@ export default function ProductDetailsScreen() {
           </View>
         </Card>
 
-        {/* Stock & Price Info */}
+        {/* Stock & Performance Card */}
         <Card style={styles.section}>
-          <View style={styles.infoGrid}>
-            <View style={styles.infoItem}>
+          <Typography variant="h3" style={styles.sectionTitle}>Stock & Performance</Typography>
+          <View style={styles.stockGrid}>
+            <View style={styles.stockItem}>
               <Typography variant="caption" color={Colors.textLight}>Current Stock</Typography>
-              <Typography variant="h3" style={styles.infoValue}>{product.currentStock}</Typography>
+              <View style={styles.stockValueRow}>
+                <View style={[styles.stockIndicator, { backgroundColor: stockStatus.color }]} />
+                <Typography variant="h3">{product.currentStock}</Typography>
+              </View>
             </View>
-            <View style={styles.infoItem}>
-              <Typography variant="caption" color={Colors.textLight}>Price</Typography>
-              <Typography variant="h3" style={styles.infoValue}>${product.buyingPrice.toFixed(2)}</Typography>
+            <View style={styles.stockItem}>
+              <Typography variant="caption" color={Colors.textLight}>Sold Units</Typography>
+              <Typography variant="h3" style={{ color: Colors.success }}>
+                {product.soldUnits || 0}
+              </Typography>
             </View>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.infoGrid}>
-            <View style={styles.infoItem}>
+            <View style={styles.stockItem}>
               <Typography variant="caption" color={Colors.textLight}>Min Stock</Typography>
-              <Typography variant="body" style={styles.infoValue}>{product.minStock}</Typography>
+              <Typography variant="h3" style={{ color: Colors.warning }}>
+                {product.minStock}
+              </Typography>
             </View>
-            <View style={styles.infoItem}>
+            <View style={styles.stockItem}>
               <Typography variant="caption" color={Colors.textLight}>Critical Stock</Typography>
-              <Typography variant="body" style={styles.infoValue}>{product.criticalStock}</Typography>
+              <Typography variant="h3" style={{ color: Colors.danger }}>
+                {product.criticalStock}
+              </Typography>
+            </View>
+            <View style={styles.stockItem}>
+              <Typography variant="caption" color={Colors.textLight}>Buying Price</Typography>
+              <Typography variant="h3">
+                {formatCurrency(product.buyingPrice)}
+              </Typography>
+            </View>
+            <View style={styles.stockItem}>
+              <Typography variant="caption" color={Colors.textLight}>Selling Price</Typography>
+              <Typography variant="h3">
+                {formatCurrency(product.sellingPrice)}
+              </Typography>
+            </View>
+            <View style={styles.stockItem}>
+              <Typography variant="caption" color={Colors.textLight}>Revenue</Typography>
+              <Typography variant="h3" style={{ color: Colors.success }}>
+                {formatCurrency(product.revenue || 0)}
+              </Typography>
+            </View>
+            <View style={styles.stockItem}>
+              <Typography variant="caption" color={Colors.textLight}>Profit</Typography>
+              <Typography variant="h3" style={{ color: Colors.primary }}>
+                {formatCurrency(product.profit || 0)}
+              </Typography>
             </View>
           </View>
         </Card>
@@ -190,6 +265,44 @@ export default function ProductDetailsScreen() {
             </View>
           )}
         </Card>
+
+        {/* Transaction History */}
+        {transactions.length > 0 && (
+          <Card style={styles.section}>
+            <Typography variant="h3" style={styles.sectionTitle}>Recent Transactions</Typography>
+            {transactions.slice(0, 5).map((transaction, index) => (
+              <View key={index} style={styles.transactionCard}>
+                <View style={styles.transactionHeader}>
+                  <View>
+                    <Typography variant="h3">{transaction.customerName}</Typography>
+                    <Typography variant="caption" color={Colors.textLight}>
+                      Invoice #{transaction.invoiceNumber}
+                    </Typography>
+                  </View>
+                  <Typography variant="caption" color={Colors.textLight}>
+                    {formatDate(transaction.date)}
+                  </Typography>
+                </View>
+                <View style={styles.transactionDetails}>
+                  <View style={styles.transactionRow}>
+                    <Typography variant="body" color={Colors.textLight}>Quantity</Typography>
+                    <Typography variant="body">{transaction.quantity} units</Typography>
+                  </View>
+                  <View style={styles.transactionRow}>
+                    <Typography variant="body" color={Colors.textLight}>Total</Typography>
+                    <Typography variant="body" style={{ fontWeight: '600' }}>{formatCurrency(transaction.total)}</Typography>
+                  </View>
+                  <View style={styles.transactionRow}>
+                    <Typography variant="body" color={Colors.textLight}>Profit</Typography>
+                    <Typography variant="body" style={{ color: Colors.success }}>
+                      {formatCurrency(transaction.profit)}
+                    </Typography>
+                  </View>
+                </View>
+              </View>
+            ))}
+          </Card>
+        )}
 
         {/* Timestamps */}
         <Card style={styles.section}>
@@ -341,6 +454,46 @@ const styles = StyleSheet.create({
   },
   centerContent: {
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stockGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.md,
+    marginTop: Spacing.sm,
+  },
+  stockItem: {
+    flex: 1,
+    minWidth: '45%',
+    gap: 4,
+  },
+  stockValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  stockIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  transactionCard: {
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.background,
+  },
+  transactionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: Spacing.sm,
+  },
+  transactionDetails: {
+    gap: 4,
+  },
+  transactionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
 });

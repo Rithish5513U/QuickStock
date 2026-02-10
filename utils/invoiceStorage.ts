@@ -5,6 +5,7 @@ export interface InvoiceItem {
   productName: string;
   quantity: number;
   price: number;
+  costPrice: number;
   total: number;
 }
 
@@ -17,6 +18,7 @@ export interface Invoice {
   subtotal: number;
   tax: number;
   total: number;
+  profit: number;
   createdAt: string;
 }
 

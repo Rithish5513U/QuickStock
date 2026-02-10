@@ -7,10 +7,12 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Modal,
 } from "react-native";
 import { useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { saveProduct, getCategories, saveCategory } from "../../utils/storage";
 import Typography from "../../components/Typography";
 import Icon from "../../components/Icon";
@@ -24,6 +26,7 @@ export default function AddEditProductScreen() {
   const route = useRoute();
   const product = (route.params as any)?.product;
   const isEditMode = !!product;
+  const [permission, requestPermission] = useCameraPermissions();
 
   const [name, setName] = useState(product?.name || "");
   const [category, setCategory] = useState(product?.category || "");
@@ -48,6 +51,8 @@ export default function AddEditProductScreen() {
   const [categories, setCategories] = useState<string[]>([]);
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [showScanner, setShowScanner] = useState(false);
+  const [scanned, setScanned] = useState(false);
 
   useEffect(() => {
     loadCategories();
@@ -144,6 +149,26 @@ export default function AddEditProductScreen() {
     ]);
   };
 
+  const handleBarcodeScanned = ({ data }: { data: string }) => {
+    if (scanned) return;
+    setScanned(true);
+    setBarcode(data);
+    setShowScanner(false);
+    Alert.alert('Barcode Scanned', `Barcode: ${data}`);
+    setTimeout(() => setScanned(false), 2000);
+  };
+
+  const handleOpenScanner = async () => {
+    if (!permission || !permission.granted) {
+      const result = await requestPermission();
+      if (!result.granted) {
+        Alert.alert('Permission Required', 'Camera permission is required to scan barcodes');
+        return;
+      }
+    }
+    setShowScanner(true);
+  };
+
   const handleSave = async () => {
     // Validation
     if (!name.trim()) {
@@ -187,6 +212,9 @@ export default function AddEditProductScreen() {
       image,
       createdAt: product?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      soldUnits: product?.soldUnits || 0,
+      revenue: product?.revenue || 0,
+      profit: product?.profit || 0,
     };
 
     const success = await saveProduct(productData);
@@ -485,7 +513,7 @@ export default function AddEditProductScreen() {
                 value={barcode}
                 onChangeText={setBarcode}
               />
-              <TouchableOpacity style={styles.scanButton}>
+              <TouchableOpacity style={styles.scanButton} onPress={handleOpenScanner}>
                 <Icon name="barcode-scan" size={24} color={Colors.primary} />
               </TouchableOpacity>
             </View>
@@ -509,6 +537,31 @@ export default function AddEditProductScreen() {
           style={{ flex: 1 }}
         />
       </View>
+
+      {/* Barcode Scanner Modal */}
+      <Modal visible={showScanner} animationType="slide" transparent>
+        <View style={styles.scannerModal}>
+          <View style={styles.scannerContainer}>
+            <CameraView
+              style={styles.camera}
+              facing="back"
+              onBarcodeScanned={handleBarcodeScanned}
+              barcodeScannerSettings={{
+                barcodeTypes: ['qr', 'ean13', 'ean8', 'code128', 'code39', 'upc_a', 'upc_e'],
+              }}
+            />
+            <TouchableOpacity
+              style={styles.closeScannerButton}
+              onPress={() => {
+                setShowScanner(false);
+                setScanned(false);
+              }}
+            >
+              <Icon name="close" size={24} color={Colors.white} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <StatusBar style="dark" />
     </View>
@@ -650,5 +703,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
+  },
+  scannerModal: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scannerContainer: {
+    width: '90%',
+    height: '60%',
+    borderRadius: 12,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  camera: {
+    flex: 1,
+  },
+  closeScannerButton: {
+    position: 'absolute',
+    top: Spacing.md,
+    right: Spacing.md,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 20,
+    padding: Spacing.sm,
   },
 });

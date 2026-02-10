@@ -15,6 +15,9 @@ export interface Product {
   image?: string;
   createdAt: string;
   updatedAt: string;
+  soldUnits?: number;
+  revenue?: number;
+  profit?: number;
 }
 
 const PRODUCTS_KEY = '@inventory_products';

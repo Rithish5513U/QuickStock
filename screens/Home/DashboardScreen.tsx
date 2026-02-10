@@ -199,7 +199,7 @@ export default function DashboardScreen({ navigation }: any) {
   };
 
   const formatCurrency = (value: number) => {
-    return `₹${value.toFixed(2)}`;
+    return `$${value.toFixed(2)}`;
   };
 
   const getChartData = () => {
@@ -379,7 +379,7 @@ export default function DashboardScreen({ navigation }: any) {
                 }}
                 bezier
                 style={styles.chart}
-                yAxisLabel={selectedMetric === 'soldStocks' ? '' : '₹'}
+                yAxisLabel={selectedMetric === 'soldStocks' ? '' : '$'}
                 yAxisSuffix=""
               />
             </Card>
