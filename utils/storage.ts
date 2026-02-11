@@ -1,24 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Product } from '../models';
 
-export interface Product {
-  id: string;
-  name: string;
-  category: string;
-  currentStock: number;
-  buyingPrice: number;
-  sellingPrice: number;
-  minStock: number;
-  criticalStock: number;
-  sku?: string;
-  barcode?: string;
-  description?: string;
-  image?: string;
-  createdAt: string;
-  updatedAt: string;
-  soldUnits?: number;
-  revenue?: number;
-  profit?: number;
-}
+// Re-export for backward compatibility
+export { Product };
 
 const PRODUCTS_KEY = '@inventory_products';
 const CATEGORIES_KEY = '@inventory_categories';

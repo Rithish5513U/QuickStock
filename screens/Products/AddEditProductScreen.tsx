@@ -13,11 +13,14 @@ import { useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { saveProduct, getCategories, saveCategory } from "../../utils/storage";
+import { Product } from '../../models';
+import { ProductService, CategoryService } from '../../services';
 import Typography from "../../components/Typography";
 import Icon from "../../components/Icon";
 import Button from "../../components/Button";
 import Card from "../../components/Card";
+import FormInput from "../../components/FormInput";
+import BottomSheetModal from "../../components/BottomSheetModal";
 import { Colors } from "../../constants/colors";
 import { Spacing } from "../../constants/spacing";
 
@@ -59,7 +62,7 @@ export default function AddEditProductScreen() {
   }, []);
 
   const loadCategories = async () => {
-    const loadedCategories = await getCategories();
+    const loadedCategories = await CategoryService.getAll();
     setCategories(loadedCategories);
   };
 
@@ -85,7 +88,7 @@ export default function AddEditProductScreen() {
       return;
     }
 
-    const success = await saveCategory(trimmedName);
+    const success = await CategoryService.save(trimmedName);
     if (success) {
       setCategory(trimmedName);
       setNewCategoryName("");
@@ -217,7 +220,7 @@ export default function AddEditProductScreen() {
       profit: product?.profit || 0,
     };
 
-    const success = await saveProduct(productData);
+    const success = await ProductService.save(productData);
 
     if (success) {
       Alert.alert(
@@ -282,18 +285,13 @@ export default function AddEditProductScreen() {
             Basic Information
           </Typography>
 
-          <View style={styles.inputGroup}>
-            <Typography variant="body" style={styles.label}>
-              Product Name *
-            </Typography>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter product name"
-              placeholderTextColor={Colors.textLight}
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
+          <FormInput
+            label="Product Name"
+            required
+            placeholder="Enter product name"
+            value={name}
+            onChangeText={setName}
+          />
 
           <View style={styles.inputGroup}>
             <Typography variant="body" style={styles.label}>
@@ -380,20 +378,15 @@ export default function AddEditProductScreen() {
             </View>
           )}
 
-          <View style={styles.inputGroup}>
-            <Typography variant="body" style={styles.label}>
-              Description
-            </Typography>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Enter product description"
-              placeholderTextColor={Colors.textLight}
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={4}
-            />
-          </View>
+          <FormInput
+            label="Description"
+            placeholder="Enter product description"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            numberOfLines={4}
+            style={styles.textArea}
+          />
         </Card>
 
         {/* Pricing & Stock */}
@@ -408,82 +401,58 @@ export default function AddEditProductScreen() {
                 Buying Price *
               </Typography>
               <TextInput
-                style={styles.input}
-                placeholder="0.00"
-                placeholderTextColor={Colors.textLight}
-                value={buyingPrice}
-                onChangeText={setBuyingPrice}
-                keyboardType="decimal-pad"
-              />
-            </View>
-
-            <View style={{ width: Spacing.md }}></View>
-
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Typography variant="body" style={styles.label}>
-                Selling Price *
-              </Typography>
-              <TextInput
-                style={styles.input}
-                placeholder="0.00"
-                placeholderTextColor={Colors.textLight}
-                value={sellingPrice}
-                onChangeText={setSellingPrice}
-                keyboardType="decimal-pad"
-              />
-            </View>
-          </View>
-          <View style={styles.row}>
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Typography variant="body" style={styles.label}>
-                Current Stock *
-              </Typography>
-              <TextInput
-                style={styles.input}
-                placeholder="0"
-                placeholderTextColor={Colors.textLight}
-                value={currentStock}
-                onChangeText={setCurrentStock}
-                keyboardType="number-pad"
-              />
-            </View>
-          </View>
-
-          <View style={styles.row}>
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Typography variant="body" style={styles.label}>
-                Min Stock
-              </Typography>
-              <TextInput
-                style={styles.input}
-                placeholder="10"
-                placeholderTextColor={Colors.textLight}
-                value={minStock}
-                onChangeText={setMinStock}
-                keyboardType="number-pad"
-              />
-            </View>
+             FormInput
+              label="Buying Price"
+              required
+              placeholder="0.00"
+              value={buyingPrice}
+              onChangeText={setBuyingPrice}
+              keyboardType="decimal-pad"
+              style={styles.halfInput}
+            />
 
             <View style={{ width: Spacing.md }} />
 
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Typography variant="body" style={styles.label}>
-                Critical Stock
-              </Typography>
-              <TextInput
-                style={styles.input}
-                placeholder="5"
-                placeholderTextColor={Colors.textLight}
-                value={criticalStock}
-                onChangeText={setCriticalStock}
-                keyboardType="number-pad"
-              />
-            </View>
+            <FormInput
+              label="Selling Price"
+              required
+              placeholder="0.00"
+              value={sellingPrice}
+              onChangeText={setSellingPrice}
+              keyboardType="decimal-pad"
+              style={styles.halfInput}
+            />
           </View>
-        </Card>
 
-        {/* Additional Details */}
-        <Card style={styles.section}>
+          <FormInput
+            label="Current Stock"
+            required
+            placeholder="0"
+            value={currentStock}
+            onChangeText={setCurrentStock}
+            keyboardType="number-pad"
+          />
+
+          <View style={styles.row}>
+            <FormInput
+              label="Min Stock"
+              placeholder="10"
+              value={minStock}
+              onChangeText={setMinStock}
+              keyboardType="number-pad"
+              style={styles.halfInput}
+            />
+
+            <View style={{ width: Spacing.md }} />
+
+            <FormInput
+              label="Critical Stock"
+              placeholder="5"
+              value={criticalStock}
+              onChangeText={setCriticalStock}
+              keyboardType="number-pad"
+              style={styles.halfInput}
+            /e={styles.section}>
           <Typography variant="h3" style={styles.sectionTitle}>
             Additional Details
           </Typography>
@@ -512,18 +481,12 @@ export default function AddEditProductScreen() {
                 placeholderTextColor={Colors.textLight}
                 value={barcode}
                 onChangeText={setBarcode}
-              />
-              <TouchableOpacity style={styles.scanButton} onPress={handleOpenScanner}>
-                <Icon name="barcode-scan" size={24} color={Colors.primary} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Card>
-
-        <View style={{ height: 100 }} />
-      </ScrollView>
-
-      {/* Bottom Actions */}
+           FormInput
+            label="SKU"
+            placeholder="Enter SKU code"
+            value={sku}
+            onChangeText={setSku}
+          / Actions */}
       <View style={styles.bottomActions}>
         <Button
           title="Cancel"
@@ -680,6 +643,9 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
+  },
+  halfInput: {
+    flex: 1,
   },
   barcodeInput: {
     flexDirection: "row",

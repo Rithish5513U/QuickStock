@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
-import { getInvoices, Invoice } from '../../utils/invoiceStorage';
+import { Invoice, Customer } from '../../models';
+import { InvoiceService, CustomerService, AnalyticsService } from '../../services';
 import Typography from '../../components/Typography';
 import Icon from '../../components/Icon';
 import Card from '../../components/Card';
@@ -44,74 +45,10 @@ export default function CustomerAnalyticsScreen() {
 
   const loadCustomerAnalytics = async () => {
     setIsLoading(true);
-    const allInvoices = await getInvoices();
+    const allInvoices = await InvoiceService.getAll();
+    const allCustomers = await CustomerService.getAll();
 
-    // Group invoices by customer phone (unique identifier)
-    const customerMap = new Map<string, CustomerAnalytics>();
-
-    allInvoices.forEach(invoice => {
-      const phone = invoice.customerPhone || 'unknown';
-      const existing = customerMap.get(phone);
-
-      // Count product quantities
-      const productCounts = new Map<string, number>();
-      invoice.items.forEach(item => {
-        const currentCount = productCounts.get(item.productName) || 0;
-        productCounts.set(item.productName, currentCount + item.quantity);
-      });
-
-      if (existing) {
-        // Update existing customer
-        existing.totalRevenue += invoice.total;
-        existing.totalProfit += invoice.profit;
-        existing.visitCount += 1;
-        existing.invoiceIds.push(invoice.id);
-        
-        // Update last visit if more recent
-        if (new Date(invoice.createdAt) > new Date(existing.lastVisit)) {
-          existing.lastVisit = invoice.createdAt;
-        }
-        
-        // Update first visit if earlier
-        if (new Date(invoice.createdAt) < new Date(existing.firstVisit)) {
-          existing.firstVisit = invoice.createdAt;
-        }
-
-        // Merge product counts
-        productCounts.forEach((quantity, productName) => {
-          const existingProduct = existing.topProducts.find(p => p.name === productName);
-          if (existingProduct) {
-            existingProduct.quantity += quantity;
-          } else {
-            existing.topProducts.push({ name: productName, quantity });
-          }
-        });
-
-        // Sort and keep top 5 products
-        existing.topProducts.sort((a, b) => b.quantity - a.quantity);
-        existing.topProducts = existing.topProducts.slice(0, 5);
-      } else {
-        // Create new customer record
-        const topProducts = Array.from(productCounts.entries())
-          .map(([name, quantity]) => ({ name, quantity }))
-          .sort((a, b) => b.quantity - a.quantity)
-          .slice(0, 5);
-
-        customerMap.set(phone, {
-          name: invoice.customerName,
-          phone: phone,
-          totalRevenue: invoice.total,
-          totalProfit: invoice.profit,
-          visitCount: 1,
-          lastVisit: invoice.createdAt,
-          firstVisit: invoice.createdAt,
-          topProducts,
-          invoiceIds: [invoice.id],
-        });
-      }
-    });
-
-    const customerList = Array.from(customerMap.values());
+    const customerList = await AnalyticsService.getCustomerAnalytics(allCustomers, allInvoices);
     setCustomers(customerList);
     setFilteredCustomers(customerList);
     setIsLoading(false);
@@ -136,31 +73,15 @@ export default function CustomerAnalyticsScreen() {
   }, [searchQuery, customers, sortBy]);
 
   const formatCurrency = (amount: number) => {
-    return `$${amount.toFixed(2)}`;
+    return AnalyticsService.formatCurrency(amount);
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    return AnalyticsService.formatDate(dateString);
   };
 
   const getVisitFrequency = (customer: CustomerAnalytics) => {
-    const daysSinceFirst = Math.floor(
-      (new Date().getTime() - new Date(customer.firstVisit).getTime()) / (1000 * 60 * 60 * 24)
-    );
-    
-    if (daysSinceFirst === 0) return 'New Customer';
-    
-    const visitsPerDay = customer.visitCount / daysSinceFirst;
-    
-    if (visitsPerDay >= 1) return 'Daily';
-    if (visitsPerDay >= 0.25) return 'Weekly';
-    if (visitsPerDay >= 0.1) return 'Monthly';
-    return 'Occasional';
+    return AnalyticsService.getVisitFrequency(customer);
   };
 
   const handleCustomerPress = (customer: CustomerAnalytics) => {

@@ -3,7 +3,8 @@ import { StyleSheet, View, ScrollView, TextInput, TouchableOpacity, Modal } from
 import { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import React from 'react';
-import { getProducts, getCategories, Product } from '../../utils/storage';
+import { Product } from '../../models';
+import { ProductService, CategoryService } from '../../services';
 import Typography from '../../components/Typography';
 import Icon from '../../components/Icon';
 import Card from '../../components/Card';
@@ -27,8 +28,8 @@ export default function SelectProductScreen({ navigation, route }: any) {
   );
 
   const loadData = async () => {
-    const loadedProducts = await getProducts();
-    const loadedCategories = await getCategories();
+    const loadedProducts = await ProductService.getAll();
+    const loadedCategories = await CategoryService.getAll();
     setProducts(loadedProducts);
     setCategories(['All', ...loadedCategories]);
   };

@@ -5,7 +5,7 @@ import Icon from './Icon';
 import ProductImage from './ProductImage';
 import { Colors } from '../constants/colors';
 import { Spacing } from '../constants/spacing';
-import { Product } from '../utils/storage';
+import { Product } from '../models';
 
 interface ProductCardProps {
   product: Product;

@@ -6,7 +6,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { getInvoices, Invoice, deleteInvoice } from '../../utils/invoiceStorage';
+import { Invoice, InvoiceItem } from '../../models';
+import { InvoiceService, AnalyticsService } from '../../services';
 import Typography from '../../components/Typography';
 import Icon from '../../components/Icon';
 import Card from '../../components/Card';
@@ -50,7 +51,7 @@ export default function CustomerDetailsScreen() {
 
   const loadCustomerDetails = async () => {
     setIsLoading(true);
-    const allInvoices = await getInvoices();
+    const allInvoices = await InvoiceService.getAll();
     
     // Filter invoices for this customer
     const customerInvoices = allInvoices.filter(
@@ -107,27 +108,15 @@ export default function CustomerDetailsScreen() {
   };
 
   const formatCurrency = (amount: number) => {
-    return `$${amount.toFixed(2)}`;
+    return AnalyticsService.formatCurrency(amount);
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    return AnalyticsService.formatDateTime(dateString);
   };
 
   const formatDateShort = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    return AnalyticsService.formatDate(dateString);
   };
 
   const handleDownloadInvoice = async (invoice: Invoice) => {
@@ -156,7 +145,7 @@ export default function CustomerDetailsScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            const success = await deleteInvoice(invoice.id);
+            const success = await InvoiceService.delete(invoice.id);
             if (success) {
               loadCustomerDetails();
             } else {

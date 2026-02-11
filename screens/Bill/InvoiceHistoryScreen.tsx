@@ -11,7 +11,8 @@ import Card from '../../components/Card';
 import EmptyState from '../../components/EmptyState';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
-import { getInvoices, deleteInvoice, Invoice } from '../../utils/invoiceStorage';
+import { Invoice } from '../../models';
+import { InvoiceService } from '../../services';
 
 export default function InvoiceHistoryScreen({ navigation }: any) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -23,7 +24,7 @@ export default function InvoiceHistoryScreen({ navigation }: any) {
   );
 
   const loadInvoices = async () => {
-    const loadedInvoices = await getInvoices();
+    const loadedInvoices = await InvoiceService.getAll();
     setInvoices(loadedInvoices);
   };
 
@@ -127,7 +128,7 @@ export default function InvoiceHistoryScreen({ navigation }: any) {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            await deleteInvoice(invoice.id);
+            await InvoiceService.delete(invoice.id);
             await loadInvoices();
           },
         },

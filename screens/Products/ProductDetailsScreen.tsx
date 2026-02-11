@@ -2,8 +2,8 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
-import { getProductById, deleteProduct, Product } from '../../utils/storage';
-import { getInvoices, Invoice, InvoiceItem } from '../../utils/invoiceStorage';
+import { Product, Invoice, InvoiceItem } from '../../models';
+import { ProductService, AnalyticsService } from '../../services';
 
 type RootStackParamList = {
   ProductDetails: { productId: string };
@@ -13,6 +13,7 @@ import Typography from '../../components/Typography';
 import Icon from '../../components/Icon';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
+import ScreenHeader from '../../components/ScreenHeader';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
 
@@ -35,7 +36,7 @@ export default function ProductDetailsScreen() {
       return;
     }
 
-    const loadedProduct = await getProductById(productId);
+    const loadedProduct = await ProductService.getById(productId);
     if (loadedProduct) {
       setProduct(loadedProduct);
       await loadTransactions(productId);
@@ -47,28 +48,7 @@ export default function ProductDetailsScreen() {
   };
 
   const loadTransactions = async (prodId: string) => {
-    const allInvoices = await getInvoices();
-    
-    const productTransactions: any[] = [];
-
-    allInvoices.forEach(invoice => {
-      invoice.items.forEach(item => {
-        if (item.productId === prodId) {
-          const itemProfit = (item.price - item.costPrice) * item.quantity;
-          productTransactions.push({
-            invoiceNumber: invoice.invoiceNumber,
-            customerName: invoice.customerName,
-            quantity: item.quantity,
-            price: item.price,
-            total: item.total,
-            profit: itemProfit,
-            date: invoice.createdAt,
-          });
-        }
-      });
-    });
-
-    productTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const productTransactions = await AnalyticsService.getProductTransactions(prodId);
     setTransactions(productTransactions);
   };
 
@@ -84,21 +64,6 @@ export default function ProductDetailsScreen() {
   };
 
   const stockStatus = getStockStatus();
-
-  const formatCurrency = (amount: number) => {
-    return `$${amount.toFixed(2)}`;
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
 
   const handleEdit = () => {
     navigation.navigate('AddEditProduct', { product: product || undefined });
@@ -116,7 +81,7 @@ export default function ProductDetailsScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            const success = await deleteProduct(product.id);
+            const success = await ProductService.delete(product.id);
             if (success) {
               navigation.goBack();
             } else {
@@ -146,14 +111,10 @@ export default function ProductDetailsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-left" size={24} />
-        </TouchableOpacity>
-        <Typography variant="h2">Product Details</Typography>
-        <View style={{ width: 40 }} />
-      </View>
+      <ScreenHeader 
+        title="Product Details"
+        onBack={() => navigation.goBack()}
+      />
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Product Image */}

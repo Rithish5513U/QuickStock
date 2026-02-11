@@ -4,12 +4,16 @@ import { useState, useEffect } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
-import { getProducts, deleteProduct as deleteProductFromStorage, getCategories, saveCategory, deleteCategory as deleteCategoryFromStorage, saveProduct, Product } from '../../utils/storage';
+import { Product } from '../../models';
+import { ProductService, CategoryService } from '../../services';
 import Typography from '../../components/Typography';
 import Icon from '../../components/Icon';
 import EmptyState from '../../components/EmptyState';
 import ProductCard from '../../components/ProductCard';
 import Button from '../../components/Button';
+import SearchBar from '../../components/SearchBar';
+import BottomSheetModal from '../../components/BottomSheetModal';
+import ChipGroup from '../../components/ChipGroup';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
 
@@ -43,8 +47,8 @@ export default function ProductsListScreen() {
 
   const loadData = async () => {
     setIsLoading(true);
-    const loadedProducts = await getProducts();
-    const loadedCategories = await getCategories();
+    const loadedProducts = await ProductService.getAll();
+    const loadedCategories = await CategoryService.getAll();
     setProducts(loadedProducts);
     setCategories(['All', ...loadedCategories]);
     setIsLoading(false);
@@ -86,7 +90,7 @@ export default function ProductsListScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            const success = await deleteProductFromStorage(product.id);
+            const success = await ProductService.delete(product.id);
             if (success) {
               loadData();
             } else {
@@ -124,8 +128,8 @@ export default function ProductsListScreen() {
     }
 
     // Delete old category and save new one
-    await deleteCategoryFromStorage(oldCategory);
-    const success = await saveCategory(trimmedName);
+    await CategoryService.delete(oldCategory);
+    const success = await CategoryService.save(trimmedName);
     
     if (success) {
       // Update products with old category to new category
@@ -133,7 +137,7 @@ export default function ProductsListScreen() {
         p.category === oldCategory ? { ...p, category: trimmedName } : p
       );
       for (const product of updatedProducts.filter(p => p.category === trimmedName)) {
-        await saveProduct(product);
+        await ProductService.save(product);
       }
       
       setEditingCategory(null);
@@ -164,7 +168,7 @@ export default function ProductsListScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            const success = await deleteCategoryFromStorage(category);
+            const success = await CategoryService.delete(category);
             if (success) {
               loadData();
             } else {
@@ -188,7 +192,7 @@ export default function ProductsListScreen() {
       return;
     }
 
-    const success = await saveCategory(trimmedName);
+    const success = await CategoryService.save(trimmedName);
     if (success) {
       setNewCategoryName('');
       setShowAddCategory(false);
@@ -215,16 +219,11 @@ export default function ProductsListScreen() {
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Icon name="search" size={20} style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search products..."
-            placeholderTextColor={Colors.textLight}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
+        <SearchBar 
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search products..."
+        />
       </View>
 
       {/* Products List */}
@@ -236,26 +235,11 @@ export default function ProductsListScreen() {
               <TouchableOpacity 
                 key={category}
                 style={[
-                  styles.categoryChip,
-                  selectedCategory !== category && styles.categoryChipOutline
-                ]}
-                onPress={() => setSelectedCategory(category)}
-              >
-                <Typography 
-                  variant="body" 
-                  color={selectedCategory === category ? Colors.white : Colors.primary} 
-                  style={styles.categoryText}
-                >
-                  {category}
-                </Typography>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        <View style={styles.section}>
-        {filteredProducts.length === 0 ? (
-          <EmptyState 
+           ChipGroup 
+            options={categories.map(cat => ({ label: cat, value: cat }))}
+            selectedValue={selectedCategory}
+            onSelect={setSelectedCategory}
+          /
             title={searchQuery || selectedCategory !== 'All' ? "No products found" : "No products yet"}
             message={searchQuery || selectedCategory !== 'All' ? "Try adjusting your search or filters" : "Start by adding your first product"}
           />
@@ -279,253 +263,212 @@ export default function ProductsListScreen() {
       </TouchableOpacity>
 
       {/* Filter Modal */}
-      <Modal
+      <BottomSheetModal
         visible={showFilterModal}
-        animationType="slide"
-        transparent={true}
-        presentationStyle="overFullScreen"
-        statusBarTranslucent={true}
-        onRequestClose={() => setShowFilterModal(false)}
+        onClose={() => setShowFilterModal(false)}
+        title="Sort & Filter"
       >
-        <View style={styles.modalOverlay}>
+        {/* Sort By Section */}
+        <View style={styles.modalSection}>
+          <Typography variant="h3" style={styles.sectionTitle}>Sort By</Typography>
           <TouchableOpacity 
-            style={StyleSheet.absoluteFill}
-            activeOpacity={1}
-            onPress={() => setShowFilterModal(false)}
-          />
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Typography variant="h3">Sort & Filter</Typography>
-              <TouchableOpacity onPress={() => setShowFilterModal(false)}>
-                <Icon name="close" size={24} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Sort By Section */}
-            <View style={styles.modalSection}>
-              <Typography variant="h3" style={styles.sectionTitle}>Sort By</Typography>
-              <TouchableOpacity 
-                style={[styles.optionItem, sortBy === 'name' && styles.optionItemActive]}
-                onPress={() => setSortBy('name')}
-              >
-                <Typography variant="body" color={sortBy === 'name' ? Colors.primary : Colors.textPrimary}>
-                  Name (A-Z)
-                </Typography>
-                {sortBy === 'name' && <Icon name="check" size={20} />}
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.optionItem, sortBy === 'price' && styles.optionItemActive]}
-                onPress={() => setSortBy('price')}
-              >
-                <Typography variant="body" color={sortBy === 'price' ? Colors.primary : Colors.textPrimary}>
-                  Price (Low to High)
-                </Typography>
-                {sortBy === 'price' && <Icon name="check" size={20} />}
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.optionItem, sortBy === 'stock' && styles.optionItemActive]}
-                onPress={() => setSortBy('stock')}
-              >
-                <Typography variant="body" color={sortBy === 'stock' ? Colors.primary : Colors.textPrimary}>
-                  Stock Level (High to Low)
-                </Typography>
-                {sortBy === 'stock' && <Icon name="check" size={20} />}
-              </TouchableOpacity>
-            </View>
-
-            {/* Stock Status Filter */}
-            <View style={styles.modalSection}>
-              <Typography variant="h3" style={styles.sectionTitle}>Stock Status</Typography>
-              <TouchableOpacity 
-                style={[styles.optionItem, stockFilter === 'all' && styles.optionItemActive]}
-                onPress={() => setStockFilter('all')}
-              >
-                <Typography variant="body" color={stockFilter === 'all' ? Colors.primary : Colors.textPrimary}>
-                  All Products
-                </Typography>
-                {stockFilter === 'all' && <Icon name="check" size={20} />}
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.optionItem, stockFilter === 'in-stock' && styles.optionItemActive]}
-                onPress={() => setStockFilter('in-stock')}
-              >
-                <Typography variant="body" color={stockFilter === 'in-stock' ? Colors.primary : Colors.textPrimary}>
-                  In Stock
-                </Typography>
-                {stockFilter === 'in-stock' && <Icon name="check" size={20} />}
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.optionItem, stockFilter === 'low' && styles.optionItemActive]}
-                onPress={() => setStockFilter('low')}
-              >
-                <Typography variant="body" color={stockFilter === 'low' ? Colors.primary : Colors.textPrimary}>
-                  Low Stock
-                </Typography>
-                {stockFilter === 'low' && <Icon name="check" size={20} />}
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.optionItem, stockFilter === 'critical' && styles.optionItemActive]}
-                onPress={() => setStockFilter('critical')}
-              >
-                <Typography variant="body" color={stockFilter === 'critical' ? Colors.primary : Colors.textPrimary}>
-                  Critical Stock
-                </Typography>
-                {stockFilter === 'critical' && <Icon name="check" size={20} />}
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.modalActions}>
-              <Button 
-                title="Reset Filters" 
-                variant="outline"
-                onPress={() => {
-                  setSortBy('name');
-                  setStockFilter('all');
-                }}
-                style={{ flex: 1 }}
-              />
-              <Button 
-                title="Apply" 
-                onPress={() => setShowFilterModal(false)}
-                style={{ flex: 1 }}
-              />
-            </View>
-          </View>
+            style={[styles.optionItem, sortBy === 'name' && styles.optionItemActive]}
+            onPress={() => setSortBy('name')}
+          >
+            <Typography variant="body" color={sortBy === 'name' ? Colors.primary : Colors.textPrimary}>
+              Name (A-Z)
+            </Typography>
+            {sortBy === 'name' && <Icon name="check" size={20} />}
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.optionItem, sortBy === 'price' && styles.optionItemActive]}
+            onPress={() => setSortBy('price')}
+          >
+            <Typography variant="body" color={sortBy === 'price' ? Colors.primary : Colors.textPrimary}>
+              Price (Low to High)
+            </Typography>
+            {sortBy === 'price' && <Icon name="check" size={20} />}
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.optionItem, sortBy === 'stock' && styles.optionItemActive]}
+            onPress={() => setSortBy('stock')}
+          >
+            <Typography variant="body" color={sortBy === 'stock' ? Colors.primary : Colors.textPrimary}>
+              Stock Level (High to Low)
+            </Typography>
+            {sortBy === 'stock' && <Icon name="check" size={20} />}
+          </TouchableOpacity>
         </View>
-      </Modal>
+
+        {/* Stock Status Filter */}
+        <View style={styles.modalSection}>
+          <Typography variant="h3" style={styles.sectionTitle}>Stock Status</Typography>
+          <TouchableOpacity 
+            style={[styles.optionItem, stockFilter === 'all' && styles.optionItemActive]}
+            onPress={() => setStockFilter('all')}
+          >
+            <Typography variant="body" color={stockFilter === 'all' ? Colors.primary : Colors.textPrimary}>
+              All Products
+            </Typography>
+            {stockFilter === 'all' && <Icon name="check" size={20} />}
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.optionItem, stockFilter === 'in-stock' && styles.optionItemActive]}
+            onPress={() => setStockFilter('in-stock')}
+          >
+            <Typography variant="body" color={stockFilter === 'in-stock' ? Colors.primary : Colors.textPrimary}>
+              In Stock
+            </Typography>
+            {stockFilter === 'in-stock' && <Icon name="check" size={20} />}
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.optionItem, stockFilter === 'low' && styles.optionItemActive]}
+            onPress={() => setStockFilter('low')}
+          >
+            <Typography variant="body" color={stockFilter === 'low' ? Colors.primary : Colors.textPrimary}>
+              Low Stock
+            </Typography>
+            {stockFilter === 'low' && <Icon name="check" size={20} />}
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.optionItem, stockFilter === 'critical' && styles.optionItemActive]}
+            onPress={() => setStockFilter('critical')}
+          >
+            <Typography variant="body" color={stockFilter === 'critical' ? Colors.primary : Colors.textPrimary}>
+              Critical Stock
+            </Typography>
+            {stockFilter === 'critical' && <Icon name="check" size={20} />}
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.modalActions}>
+          <Button 
+            title="Reset Filters" 
+            variant="outline"
+            onPress={() => {
+              setSortBy('name');
+              setStockFilter('all');
+            }}
+            style={{ flex: 1 }}
+          />
+          <Button 
+            title="Apply" 
+            onPress={() => setShowFilterModal(false)}
+            style={{ flex: 1 }}
+          />
+        </View>
+      </BottomSheetModal>
 
       {/* Categories Management Modal */}
-      <Modal
+      <BottomSheetModal
         visible={showCategoriesModal}
-        animationType="slide"
-        transparent={true}
-        presentationStyle="overFullScreen"
-        statusBarTranslucent={true}
-        onRequestClose={() => setShowCategoriesModal(false)}
+        onClose={() => setShowCategoriesModal(false)}
+        title="Manage Categories"
+        maxHeight="85%"
       >
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity 
-            style={StyleSheet.absoluteFill}
-            activeOpacity={1}
-            onPress={() => setShowCategoriesModal(false)}
-          />
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Typography variant="h3">Manage Categories</Typography>
-              <TouchableOpacity onPress={() => setShowCategoriesModal(false)}>
-                <Icon name="close" size={24} />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.modalScrollView}>
-              <View style={styles.modalSection}>
-                <Typography variant="body" color={Colors.textLight} style={styles.helperText}>
-                  Categories help organize your products. You can add, edit, or delete categories here.
-                </Typography>
-                
-                {categories.filter(c => c !== 'All').map((category, index) => {
-                  const productCount = products.filter(p => p.category === category).length;
-                  const isEditing = editingCategory === category;
-                  
-                  return (
-                    <View key={index} style={styles.categoryItem}>
-                      {isEditing ? (
-                        <View style={styles.editCategoryContainer}>
-                          <TextInput
-                            style={styles.editCategoryInput}
-                            value={editCategoryName}
-                            onChangeText={setEditCategoryName}
-                            autoFocus
-                          />
-                          <View style={styles.categoryActions}>
-                            <TouchableOpacity 
-                              style={styles.categoryActionButton}
-                              onPress={() => handleSaveEditCategory(category)}
-                            >
-                              <Icon name="check" size={20} color={Colors.success} />
-                            </TouchableOpacity>
-                            <TouchableOpacity 
-                              style={styles.categoryActionButton}
-                              onPress={() => {
-                                setEditingCategory(null);
-                                setEditCategoryName('');
-                              }}
-                            >
-                              <Icon name="close" size={20} color={Colors.danger} />
-                            </TouchableOpacity>
-                          </View>
-                        </View>
-                      ) : (
-                        <>
-                          <View style={styles.categoryInfo}>
-                            <Typography variant="body">{category}</Typography>
-                            <Typography variant="caption" color={Colors.textLight}>
-                              {productCount} {productCount === 1 ? 'product' : 'products'}
-                            </Typography>
-                          </View>
-                          <View style={styles.categoryActions}>
-                            <TouchableOpacity 
-                              style={styles.categoryActionButton}
-                              onPress={() => handleEditCategory(category)}
-                            >
-                              <Icon name="edit" size={20} />
-                            </TouchableOpacity>
-                            <TouchableOpacity 
-                              style={styles.categoryActionButton}
-                              onPress={() => handleDeleteCategory(category)}
-                            >
-                              <Icon name="delete-bin" size={20} />
-                            </TouchableOpacity>
-                          </View>
-                        </>
-                      )}
-                    </View>
-                  );
-                })}
-                
-                {showAddCategory && (
-                  <View style={styles.categoryItem}>
-                    <View style={styles.editCategoryContainer}>
-                      <TextInput
-                        style={styles.editCategoryInput}
-                        placeholder="Category name"
-                        placeholderTextColor={Colors.textLight}
-                        value={newCategoryName}
-                        onChangeText={setNewCategoryName}
-                        autoFocus
-                      />
-                      <View style={styles.categoryActions}>
-                        <TouchableOpacity 
-                          style={styles.categoryActionButton}
-                          onPress={handleAddCategory}
-                        >
-                          <Icon name="check" size={20} color={Colors.success} />
-                        </TouchableOpacity>
-                        <TouchableOpacity 
-                          style={styles.categoryActionButton}
-                          onPress={() => {
-                            setShowAddCategory(false);
-                            setNewCategoryName('');
-                          }}
-                        >
-                          <Icon name="close" size={20} color={Colors.danger} />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
+        <Typography variant="body" color={Colors.textLight} style={styles.helperText}>
+          Categories help organize your products. You can add, edit, or delete categories here.
+        </Typography>
+        
+        {categories.filter(c => c !== 'All').map((category, index) => {
+          const productCount = products.filter(p => p.category === category).length;
+          const isEditing = editingCategory === category;
+          
+          return (
+            <View key={index} style={styles.categoryItem}>
+              {isEditing ? (
+                <View style={styles.editCategoryContainer}>
+                  <TextInput
+                    style={styles.editCategoryInput}
+                    value={editCategoryName}
+                    onChangeText={setEditCategoryName}
+                    autoFocus
+                  />
+                  <View style={styles.categoryActions}>
+                    <TouchableOpacity 
+                      style={styles.categoryActionButton}
+                      onPress={() => handleSaveEditCategory(category)}
+                    >
+                      <Icon name="check" size={20} color={Colors.success} />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.categoryActionButton}
+                      onPress={() => {
+                        setEditingCategory(null);
+                        setEditCategoryName('');
+                      }}
+                    >
+                      <Icon name="close" size={20} color={Colors.danger} />
+                    </TouchableOpacity>
                   </View>
-                )}
-              </View>
-            </ScrollView>
-
-            <View style={styles.modalActions}>
-              <Button 
-                title="Add Category" 
-                onPress={() => setShowAddCategory(true)}
+                </View>
+              ) : (
+                <>
+                  <View style={styles.categoryInfo}>
+                    <Typography variant="body">{category}</Typography>
+                    <Typography variant="caption" color={Colors.textLight}>
+                      {productCount} {productCount === 1 ? 'product' : 'products'}
+                    </Typography>
+                  </View>
+                  <View style={styles.categoryActions}>
+                    <TouchableOpacity 
+                      style={styles.categoryActionButton}
+                      onPress={() => handleEditCategory(category)}
+                    >
+                      <Icon name="edit" size={20} />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.categoryActionButton}
+                      onPress={() => handleDeleteCategory(category)}
+                    >
+                      <Icon name="delete-bin" size={20} />
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
+            </View>
+          );
+        })}
+        
+        {showAddCategory && (
+          <View style={styles.categoryItem}>
+            <View style={styles.editCategoryContainer}>
+              <TextInput
+                style={styles.editCategoryInput}
+                placeholder="Category name"
+                placeholderTextColor={Colors.textLight}
+                value={newCategoryName}
+                onChangeText={setNewCategoryName}
+                autoFocus
               />
+              <View style={styles.categoryActions}>
+                <TouchableOpacity 
+                  style={styles.categoryActionButton}
+                  onPress={handleAddCategory}
+                >
+                  <Icon name="check" size={20} color={Colors.success} />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.categoryActionButton}
+                  onPress={() => {
+                    setShowAddCategory(false);
+                    setNewCategoryName('');
+                  }}
+                >
+                  <Icon name="close" size={20} color={Colors.danger} />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
+        )}
+
+        <View style={styles.modalActions}>
+          <Button 
+            title="Add Category" 
+            onPress={() => setShowAddCategory(true)}
+          />
         </View>
-      </Modal>
+      </BottomSheetModal>
       
       <StatusBar style="dark" />
     </View>
@@ -611,32 +554,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
-  // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: Colors.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: Spacing.lg,
-    maxHeight: '100%',
-    paddingBottom: Spacing.xxl,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.background,
-  },
-  modalScrollView: {
-    maxHeight: 400,
-  },
+  // Modal Content Styles
   modalSection: {
     padding: Spacing.lg,
   },

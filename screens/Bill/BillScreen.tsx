@@ -12,9 +12,8 @@ import Card from '../../components/Card';
 import Button from '../../components/Button';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
-import { getProducts, saveProduct, Product } from '../../utils/storage';
-import { saveInvoice, Invoice, InvoiceItem } from '../../utils/invoiceStorage';
-import { getCustomers, saveCustomer, Customer } from '../../utils/customerStorage';
+import { Product, Invoice, InvoiceItem, Customer } from '../../models';
+import { ProductService, InvoiceService, CustomerService } from '../../services';
 
 export default function BillScreen({ navigation, route }: any) {
   const [permission, requestPermission] = useCameraPermissions();
@@ -45,8 +44,8 @@ export default function BillScreen({ navigation, route }: any) {
   );
 
   const loadData = async () => {
-    const loadedProducts = await getProducts();
-    const loadedCustomers = await getCustomers();
+    const loadedProducts = await ProductService.getAll();
+    const loadedCustomers = await CustomerService.getAll();
     setProducts(loadedProducts);
     setCustomers(loadedCustomers);
   };
@@ -196,14 +195,13 @@ export default function BillScreen({ navigation, route }: any) {
       createdAt: new Date().toISOString(),
     };
 
-    await saveCustomer(customer);
+    await CustomerService.save(customer);
     await loadData();
     await createInvoice(customer);
   };
 
   const createInvoice = async (customer: Customer) => {
     const items: InvoiceItem[] = [];
-    const productsToUpdate: Product[] = [];
 
     scannedItems.forEach((qty, productId) => {
       const product = products.find(p => p.id === productId);
@@ -218,13 +216,6 @@ export default function BillScreen({ navigation, route }: any) {
           costPrice: cost,
           total: price * qty,
         });
-        productsToUpdate.push({
-          ...product,
-          currentStock: product.currentStock - qty,
-          soldUnits: (product.soldUnits || 0) + qty,
-          revenue: (product.revenue || 0) + (price * qty),
-          profit: (product.profit || 0) + ((price - cost) * qty),
-        });
       }
     });
 
@@ -232,7 +223,7 @@ export default function BillScreen({ navigation, route }: any) {
 
     const invoice: Invoice = {
       id: Date.now().toString(),
-      invoiceNumber: `INV-${Date.now()}`,
+      invoiceNumber: InvoiceService.generateInvoiceNumber(),
       customerName: customer.name,
       customerPhone: customer.phone,
       items,
@@ -243,10 +234,16 @@ export default function BillScreen({ navigation, route }: any) {
       createdAt: new Date().toISOString(),
     };
 
-    const success = await saveInvoice(invoice);
+    const success = await InvoiceService.save(invoice);
     if (success) {
-      for (const product of productsToUpdate) {
-        await saveProduct(product);
+      // Update products using ProductService.recordSale
+      for (const item of items) {
+        await ProductService.recordSale(
+          item.productId,
+          item.quantity,
+          item.price,
+          item.costPrice
+        );
       }
       setCurrentInvoice(invoice);
       setShowCustomerModal(false);

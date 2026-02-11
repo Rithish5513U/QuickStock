@@ -1,11 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Customer } from '../models';
 
-export interface Customer {
-  id: string;
-  name: string;
-  phone: string;
-  createdAt: string;
-}
+// Re-export for backward compatibility
+export { Customer };
 
 const CUSTOMERS_KEY = '@inventory_customers';
 

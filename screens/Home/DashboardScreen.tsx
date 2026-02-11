@@ -13,7 +13,8 @@ import Icon from '../../components/Icon';
 import ProductCard from '../../components/ProductCard';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
-import { getProducts, Product, deleteProduct } from '../../utils/storage';
+import { Product } from '../../models';
+import { ProductService, AnalyticsService } from '../../services';
 
 interface DashboardStats {
   totalProducts: number;
@@ -57,32 +58,19 @@ export default function DashboardScreen({ navigation }: any) {
 
   const loadDashboardData = async () => {
     try {
-      const products = await getProducts();
+      const products = await ProductService.getAll();
       
-      // Calculate stats
+      // Calculate stats using AnalyticsService
       const totalProducts = products.length;
-      const totalStockValue = products.reduce((sum, p) => sum + (p.currentStock * p.buyingPrice), 0);
-      
-      // Calculate profit and revenue
-      // Using sellingPrice - buyingPrice for profit calculation
-      // Assuming selling price is the 'price' field and buying price is 80% of price if not set
-      const totalProfit = products.reduce((sum, p) => {
-        const selling = p.sellingPrice;
-        const buying = p.buyingPrice;
-        return sum + ((selling - buying) * p.currentStock);
-      }, 0);
-      
-      const totalRevenue = products.reduce((sum, p) => {
-        const selling = p.sellingPrice;
-        return sum + (selling * p.currentStock);
-      }, 0);
-      
-      const avgProfitMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+      const totalStockValue = AnalyticsService.calculateInventoryValue(products);
+      const totalRevenue = AnalyticsService.calculateTotalRevenue(products);
+      const totalProfit = AnalyticsService.calculateTotalProfit(products);
+      const avgProfitMargin = AnalyticsService.calculateAverageProfitMargin(products);
       const totalCategories = new Set(products.map(p => p.category)).size;
       
-      const lowStockCount = products.filter(p => p.currentStock > 0 && p.currentStock <= p.minStock).length;
-      const criticalStockCount = products.filter(p => p.currentStock > 0 && p.currentStock <= p.criticalStock).length;
-      const outOfStockCount = products.filter(p => p.currentStock === 0).length;
+      const lowStockCount = AnalyticsService.getLowStockCount(products);
+      const criticalStockCount = AnalyticsService.getCriticalStockCount(products);
+      const outOfStockCount = AnalyticsService.getOutOfStockCount(products);
       
       // Get 5 most recently added products
       const recentProducts = [...products]
@@ -125,16 +113,15 @@ export default function DashboardScreen({ navigation }: any) {
         weekStart.setDate(productDate.getDate() - productDate.getDay());
         const weekKey = weekStart.toISOString().split('T')[0];
         
-        const selling = p.sellingPrice;
-        const buying = p.buyingPrice;
-        const revenue = selling * p.currentStock;
-        const profit = (selling - buying) * p.currentStock;
+        const revenue = p.revenue || 0;
+        const profit = p.profit || 0;
+        const soldUnits = p.soldUnits || 0;
         
         const existing = weeklyData.get(weekKey) || { revenue: 0, profit: 0, soldStocks: 0 };
         weeklyData.set(weekKey, {
           revenue: existing.revenue + revenue,
           profit: existing.profit + profit,
-          soldStocks: existing.soldStocks + p.currentStock
+          soldStocks: existing.soldStocks + soldUnits
         });
       });
       
@@ -244,7 +231,7 @@ export default function DashboardScreen({ navigation }: any) {
           style: 'destructive',
           onPress: async () => {
             try {
-              await deleteProduct(product.id);
+              await ProductService.delete(product.id);
               await loadDashboardData();
             } catch (error) {
               console.error('Error deleting product:', error);
