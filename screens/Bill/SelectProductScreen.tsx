@@ -57,7 +57,11 @@ export default function SelectProductScreen({ navigation, route }: any) {
   });
 
   const handleSelectProduct = (product: Product) => {
-    navigation.navigate('Bill', { selectedProduct: product });
+    const onSelectProduct = route.params?.onSelectProduct;
+    if (onSelectProduct) {
+      onSelectProduct(product);
+    }
+    navigation.goBack();
   };
 
   const applyFilters = () => {

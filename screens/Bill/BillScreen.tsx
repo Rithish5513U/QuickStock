@@ -29,26 +29,17 @@ export default function BillScreen({ navigation, route }: any) {
   const [scanned, setScanned] = useState(false);
   const [customerStep, setCustomerStep] = useState<'phone' | 'name'>('phone');
 
-  useFocusEffect(
-    React.useCallback(() => {
-      loadData();
-      
-      // Check if a product was selected
-      if (route.params?.selectedProduct) {
-        const selectedProduct = route.params.selectedProduct;
-        handleSelectProduct(selectedProduct);
-        // Clear the param
-        navigation.setParams({ selectedProduct: undefined });
-      }
-    }, [route.params?.selectedProduct])
-  );
-
   const loadData = async () => {
     const loadedProducts = await ProductService.getAll();
     const loadedCustomers = await CustomerService.getAll();
     setProducts(loadedProducts);
     setCustomers(loadedCustomers);
   };
+
+  // Load data on component mount
+  React.useEffect(() => {
+    loadData();
+  }, []);
 
   const handleBarcodeScanned = ({ data }: { data: string }) => {
     if (scanned) return;
@@ -57,15 +48,18 @@ export default function BillScreen({ navigation, route }: any) {
     const product = products.find(p => p.barcode === data || p.sku === data);
     if (product) {
       if (product.currentStock > 0) {
-        const currentQty = scannedItems.get(product.id) || 0;
-        if (currentQty < product.currentStock) {
-          const newItems = new Map(scannedItems);
-          newItems.set(product.id, currentQty + 1);
-          setScannedItems(newItems);
-          Alert.alert('Added', `${product.name} added`);
-        } else {
-          Alert.alert('Out of Stock', `Only ${product.currentStock} available`);
-        }
+        setScannedItems(prevItems => {
+          const currentQty = prevItems.get(product.id) || 0;
+          if (currentQty < product.currentStock) {
+            const newItems = new Map(prevItems);
+            newItems.set(product.id, currentQty + 1);
+            Alert.alert('Added', `${product.name} added`);
+            return newItems;
+          } else {
+            Alert.alert('Out of Stock', `Only ${product.currentStock} available`);
+            return prevItems;
+          }
+        });
       } else {
         Alert.alert('Out of Stock', `${product.name} is out of stock`);
       }
@@ -76,50 +70,44 @@ export default function BillScreen({ navigation, route }: any) {
     setTimeout(() => setScanned(false), 2000);
   };
 
-  const handleSelectProduct = (product: Product) => {
-    if (product.currentStock === 0) {
-      Alert.alert('Out of Stock', `${product.name} is out of stock`);
-      return;
-    }
-    const currentQty = scannedItems.get(product.id) || 0;
-    if (currentQty < product.currentStock) {
-      const newItems = new Map(scannedItems);
-      newItems.set(product.id, currentQty + 1);
-      setScannedItems(newItems);
-    } else {
-      Alert.alert('Out of Stock', `Only ${product.currentStock} available`);
-    }
-  };
-
   const handleRemoveItem = (productId: string) => {
-    const newItems = new Map(scannedItems);
-    newItems.delete(productId);
-    setScannedItems(newItems);
+    setScannedItems(prevItems => {
+      const newItems = new Map(prevItems);
+      newItems.delete(productId);
+      return newItems;
+    });
   };
 
   const handleIncrementItem = (productId: string) => {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
-    const currentQty = scannedItems.get(productId) || 0;
-    if (currentQty < product.currentStock) {
-      const newItems = new Map(scannedItems);
-      newItems.set(productId, currentQty + 1);
-      setScannedItems(newItems);
-    } else {
-      Alert.alert('Out of Stock', `Only ${product.currentStock} available`);
-    }
+    setScannedItems(prevItems => {
+      const currentQty = prevItems.get(productId) || 0;
+      if (currentQty < product.currentStock) {
+        const newItems = new Map(prevItems);
+        newItems.set(productId, currentQty + 1);
+        return newItems;
+      } else {
+        Alert.alert('Out of Stock', `Only ${product.currentStock} available`);
+        return prevItems;
+      }
+    });
   };
 
   const handleDecrementItem = (productId: string) => {
-    const currentQty = scannedItems.get(productId) || 0;
-    if (currentQty > 1) {
-      const newItems = new Map(scannedItems);
-      newItems.set(productId, currentQty - 1);
-      setScannedItems(newItems);
-    } else {
-      handleRemoveItem(productId);
-    }
+    setScannedItems(prevItems => {
+      const currentQty = prevItems.get(productId) || 0;
+      if (currentQty > 1) {
+        const newItems = new Map(prevItems);
+        newItems.set(productId, currentQty - 1);
+        return newItems;
+      } else {
+        const newItems = new Map(prevItems);
+        newItems.delete(productId);
+        return newItems;
+      }
+    });
   };
 
   const handleQuantityChange = (productId: string, qty: string) => {
@@ -132,13 +120,15 @@ export default function BillScreen({ navigation, route }: any) {
       return;
     }
 
-    const newItems = new Map(scannedItems);
-    if (quantity > 0) {
-      newItems.set(productId, quantity);
-    } else {
-      newItems.delete(productId);
-    }
-    setScannedItems(newItems);
+    setScannedItems(prevItems => {
+      const newItems = new Map(prevItems);
+      if (quantity > 0) {
+        newItems.set(productId, quantity);
+      } else {
+        newItems.delete(productId);
+      }
+      return newItems;
+    });
   };
 
   const calculateTotals = () => {
@@ -366,7 +356,21 @@ export default function BillScreen({ navigation, route }: any) {
           <Typography variant="h3" style={styles.sectionTitle}>Scan Barcode</Typography>
           <TouchableOpacity 
             style={styles.addButton}
-            onPress={() => navigation.navigate('SelectProduct')}
+            onPress={() => navigation.navigate('SelectProduct', {
+              onSelectProduct: (product: Product) => {
+                setScannedItems(prevItems => {
+                  const currentQty = prevItems.get(product.id) || 0;
+                  if (currentQty < product.currentStock) {
+                    const newItems = new Map(prevItems);
+                    newItems.set(product.id, currentQty + 1);
+                    return newItems;
+                  } else {
+                    Alert.alert('Out of Stock', `Only ${product.currentStock} available`);
+                    return prevItems;
+                  }
+                });
+              }
+            })}
           >
             <Icon name="add" size={18} color={Colors.white} />
             <Typography variant="caption" style={styles.addButtonText}>Add Item</Typography>

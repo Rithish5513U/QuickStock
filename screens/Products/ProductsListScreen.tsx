@@ -230,16 +230,16 @@ export default function ProductsListScreen() {
       <ScrollView style={styles.scrollView}>
         {/* Categories Quick Filter */}
         <View style={styles.section}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {categories.map(category => (
-              <TouchableOpacity 
-                key={category}
-                style={[
-           ChipGroup 
+          <ChipGroup 
             options={categories.map(cat => ({ label: cat, value: cat }))}
             selectedValue={selectedCategory}
             onSelect={setSelectedCategory}
-          /
+          />
+        </View>
+
+        <View style={styles.section}>
+        {filteredProducts.length === 0 ? (
+          <EmptyState 
             title={searchQuery || selectedCategory !== 'All' ? "No products found" : "No products yet"}
             message={searchQuery || selectedCategory !== 'All' ? "Try adjusting your search or filters" : "Start by adding your first product"}
           />

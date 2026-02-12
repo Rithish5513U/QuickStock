@@ -396,12 +396,7 @@ export default function AddEditProductScreen() {
           </Typography>
 
           <View style={styles.row}>
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Typography variant="body" style={styles.label}>
-                Buying Price *
-              </Typography>
-              <TextInput
-             FormInput
+            <FormInput
               label="Buying Price"
               required
               placeholder="0.00"
@@ -452,23 +447,22 @@ export default function AddEditProductScreen() {
               onChangeText={setCriticalStock}
               keyboardType="number-pad"
               style={styles.halfInput}
-            /e={styles.section}>
+            />
+          </View>
+        </Card>
+
+        {/* Additional Details */}
+        <Card style={styles.section}>
           <Typography variant="h3" style={styles.sectionTitle}>
             Additional Details
           </Typography>
 
-          <View style={styles.inputGroup}>
-            <Typography variant="body" style={styles.label}>
-              SKU
-            </Typography>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter SKU code"
-              placeholderTextColor={Colors.textLight}
-              value={sku}
-              onChangeText={setSku}
-            />
-          </View>
+          <FormInput
+            label="SKU"
+            placeholder="Enter SKU code"
+            value={sku}
+            onChangeText={setSku}
+          />
 
           <View style={styles.inputGroup}>
             <Typography variant="body" style={styles.label}>
@@ -481,12 +475,16 @@ export default function AddEditProductScreen() {
                 placeholderTextColor={Colors.textLight}
                 value={barcode}
                 onChangeText={setBarcode}
-           FormInput
-            label="SKU"
-            placeholder="Enter SKU code"
-            value={sku}
-            onChangeText={setSku}
-          / Actions */}
+              />
+              <TouchableOpacity style={styles.scanButton} onPress={handleOpenScanner}>
+                <Icon name="barcode-scan" size={24} color={Colors.primary} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Card>
+      </ScrollView>
+
+      {/* Actions */}
       <View style={styles.bottomActions}>
         <Button
           title="Cancel"

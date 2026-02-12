@@ -175,25 +175,25 @@ export default function ProductDetailsScreen() {
             <View style={styles.stockItem}>
               <Typography variant="caption" color={Colors.textLight}>Buying Price</Typography>
               <Typography variant="h3">
-                {formatCurrency(product.buyingPrice)}
+                {AnalyticsService.formatCurrency(product.buyingPrice)}
               </Typography>
             </View>
             <View style={styles.stockItem}>
               <Typography variant="caption" color={Colors.textLight}>Selling Price</Typography>
               <Typography variant="h3">
-                {formatCurrency(product.sellingPrice)}
+                {AnalyticsService.formatCurrency(product.sellingPrice)}
               </Typography>
             </View>
             <View style={styles.stockItem}>
               <Typography variant="caption" color={Colors.textLight}>Revenue</Typography>
               <Typography variant="h3" style={{ color: Colors.success }}>
-                {formatCurrency(product.revenue || 0)}
+                {AnalyticsService.formatCurrency(product.revenue || 0)}
               </Typography>
             </View>
             <View style={styles.stockItem}>
               <Typography variant="caption" color={Colors.textLight}>Profit</Typography>
               <Typography variant="h3" style={{ color: Colors.primary }}>
-                {formatCurrency(product.profit || 0)}
+                {AnalyticsService.formatCurrency(product.profit || 0)}
               </Typography>
             </View>
           </View>
@@ -241,7 +241,7 @@ export default function ProductDetailsScreen() {
                     </Typography>
                   </View>
                   <Typography variant="caption" color={Colors.textLight}>
-                    {formatDate(transaction.date)}
+                    {AnalyticsService.formatDate(transaction.date)}
                   </Typography>
                 </View>
                 <View style={styles.transactionDetails}>
@@ -251,12 +251,12 @@ export default function ProductDetailsScreen() {
                   </View>
                   <View style={styles.transactionRow}>
                     <Typography variant="body" color={Colors.textLight}>Total</Typography>
-                    <Typography variant="body" style={{ fontWeight: '600' }}>{formatCurrency(transaction.total)}</Typography>
+                    <Typography variant="body" style={{ fontWeight: '600' }}>{AnalyticsService.formatCurrency(transaction.total)}</Typography>
                   </View>
                   <View style={styles.transactionRow}>
                     <Typography variant="body" color={Colors.textLight}>Profit</Typography>
                     <Typography variant="body" style={{ color: Colors.success }}>
-                      {formatCurrency(transaction.profit)}
+                      {AnalyticsService.formatCurrency(transaction.profit)}
                     </Typography>
                   </View>
                 </View>
