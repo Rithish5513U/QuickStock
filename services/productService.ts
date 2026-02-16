@@ -185,4 +185,17 @@ export class ProductService {
       .sort((a, b) => (b.soldUnits || 0) - (a.soldUnits || 0))
       .slice(0, limit);
   }
+
+  /**
+   * Clear all products from storage
+   */
+  static async clearAll(): Promise<boolean> {
+    try {
+      await AsyncStorage.removeItem(PRODUCTS_KEY);
+      return true;
+    } catch (error) {
+      console.error('Error clearing products:', error);
+      return false;
+    }
+  }
 }

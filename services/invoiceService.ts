@@ -122,4 +122,17 @@ export class InvoiceService {
     
     return profit;
   }
+
+  /**
+   * Clear all invoices from storage
+   */
+  static async clearAll(): Promise<boolean> {
+    try {
+      await AsyncStorage.removeItem(INVOICES_KEY);
+      return true;
+    } catch (error) {
+      console.error('Error clearing invoices:', error);
+      return false;
+    }
+  }
 }

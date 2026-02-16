@@ -55,4 +55,17 @@ export class CategoryService {
   static exists(categories: string[], category: string): boolean {
     return categories.includes(category);
   }
+
+  /**
+   * Clear all categories from storage
+   */
+  static async clearAll(): Promise<boolean> {
+    try {
+      await AsyncStorage.removeItem(CATEGORIES_KEY);
+      return true;
+    } catch (error) {
+      console.error('Error clearing categories:', error);
+      return false;
+    }
+  }
 }

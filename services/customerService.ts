@@ -95,4 +95,17 @@ export class CustomerService {
   static isValidName(name: string): boolean {
     return name.trim().length >= 2;
   }
+
+  /**
+   * Clear all customers from storage
+   */
+  static async clearAll(): Promise<boolean> {
+    try {
+      await AsyncStorage.removeItem(CUSTOMERS_KEY);
+      return true;
+    } catch (error) {
+      console.error('Error clearing customers:', error);
+      return false;
+    }
+  }
 }
