@@ -23,6 +23,7 @@ import FormInput from "../../components/FormInput";
 import BottomSheetModal from "../../components/BottomSheetModal";
 import { Colors } from "../../constants/colors";
 import { Spacing } from "../../constants/spacing";
+import { widthScale, heightScale, mediumScale } from '../../constants/size';
 
 export default function AddEditProductScreen() {
   const navigation = useNavigation();
@@ -542,9 +543,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: Spacing.lg,
-    paddingTop: 60,
+    paddingTop: heightScale(60),
     backgroundColor: Colors.white,
-    borderBottomWidth: 1,
+    borderBottomWidth: mediumScale(1),
     borderBottomColor: Colors.background,
   },
   backButton: {
@@ -560,7 +561,7 @@ const styles = StyleSheet.create({
   imagePicker: {
     width: "100%",
     aspectRatio: 1,
-    borderRadius: 12,
+    borderRadius: mediumScale(12),
     overflow: "hidden",
     backgroundColor: Colors.background,
   },
@@ -585,15 +586,15 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: Colors.background,
-    borderRadius: 8,
+    borderRadius: mediumScale(8),
     padding: Spacing.md,
-    fontSize: 16,
+    fontSize: mediumScale(16),
     color: Colors.textPrimary,
-    borderWidth: 1,
+    borderWidth: mediumScale(1),
     borderColor: Colors.background,
   },
   textArea: {
-    height: 100,
+    height: heightScale(100),
     textAlignVertical: "top",
   },
   picker: {
@@ -601,16 +602,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: Colors.background,
-    borderRadius: 8,
+    borderRadius: mediumScale(8),
     padding: Spacing.md,
-    borderWidth: 1,
+    borderWidth: mediumScale(1),
     borderColor: Colors.background,
   },
   pickerOptions: {
     marginTop: Spacing.xs,
     backgroundColor: Colors.white,
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: mediumScale(8),
+    borderWidth: mediumScale(1),
     borderColor: Colors.background,
     overflow: "hidden",
   },
@@ -619,7 +620,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: Spacing.md,
-    borderBottomWidth: 1,
+    borderBottomWidth: mediumScale(1),
     borderBottomColor: Colors.background,
   },
   otherOption: {
@@ -637,7 +638,7 @@ const styles = StyleSheet.create({
   categoryActionBtn: {
     padding: Spacing.sm,
     backgroundColor: Colors.background,
-    borderRadius: 8,
+    borderRadius: mediumScale(8),
   },
   row: {
     flexDirection: "row",
@@ -653,19 +654,19 @@ const styles = StyleSheet.create({
   scanButton: {
     padding: Spacing.md,
     backgroundColor: Colors.background,
-    borderRadius: 8,
+    borderRadius: mediumScale(8),
   },
   bottomActions: {
     flexDirection: "row",
     gap: Spacing.md,
     padding: Spacing.lg,
     backgroundColor: Colors.white,
-    borderTopWidth: 1,
+    borderTopWidth: mediumScale(1),
     borderTopColor: Colors.background,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
+    shadowOffset: { width: 0, height: heightScale(-2) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: mediumScale(4),
     elevation: 5,
   },
   scannerModal: {
@@ -677,7 +678,7 @@ const styles = StyleSheet.create({
   scannerContainer: {
     width: '90%',
     height: '60%',
-    borderRadius: 12,
+    borderRadius: mediumScale(12),
     overflow: 'hidden',
     position: 'relative',
   },
@@ -689,7 +690,7 @@ const styles = StyleSheet.create({
     top: Spacing.md,
     right: Spacing.md,
     backgroundColor: 'rgba(0,0,0,0.6)',
-    borderRadius: 20,
+    borderRadius: mediumScale(20),
     padding: Spacing.sm,
   },
 });

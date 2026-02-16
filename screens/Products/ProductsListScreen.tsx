@@ -16,6 +16,7 @@ import BottomSheetModal from '../../components/BottomSheetModal';
 import ChipGroup from '../../components/ChipGroup';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
+import { widthScale, heightScale, mediumScale } from '../../constants/size';
 
 type RootStackParamList = {
   AddEditProduct: { product?: Product } | undefined;
@@ -488,7 +489,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: Spacing.lg,
-    paddingTop: 60,
+    paddingTop: heightScale(60),
     backgroundColor: Colors.white,
   },
   headerActions: {
@@ -507,7 +508,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.background,
-    borderRadius: 25,
+    borderRadius: mediumScale(25),
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
   },
@@ -516,7 +517,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 14,
+    fontSize: mediumScale(14),
     color: Colors.textPrimary,
   },
   section: {
@@ -526,33 +527,33 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
-    borderRadius: 20,
+    borderRadius: mediumScale(20),
     marginRight: Spacing.sm,
   },
   categoryChipOutline: {
     backgroundColor: Colors.white,
-    borderWidth: 1,
+    borderWidth: mediumScale(1),
     borderColor: Colors.primary,
   },
   categoryText: {
-    fontSize: 14,
+    fontSize: mediumScale(14),
     fontWeight: '600',
   },
   fab: {
     position: 'absolute',
     right: Spacing.lg,
     bottom: Spacing.lg,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: widthScale(56),
+    height: heightScale(56),
+    borderRadius: mediumScale(28),
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
     shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: heightScale(4) },
     shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowRadius: mediumScale(8),
   },
   // Modal Content Styles
   modalSection: {
@@ -567,7 +568,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.md,
-    borderRadius: 8,
+    borderRadius: mediumScale(8),
     marginBottom: Spacing.xs,
   },
   optionItemActive: {
@@ -577,12 +578,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.md,
     padding: Spacing.lg,
-    borderTopWidth: 1,
+    borderTopWidth: mediumScale(1),
     borderTopColor: Colors.background,
   },
   helperText: {
     marginBottom: Spacing.md,
-    lineHeight: 20,
+    lineHeight: mediumScale(20),
   },
   categoryItem: {
     flexDirection: 'row',
@@ -591,7 +592,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.md,
     backgroundColor: Colors.light,
-    borderRadius: 8,
+    borderRadius: mediumScale(8),
     marginBottom: Spacing.sm,
   },
   categoryInfo: {
@@ -613,11 +614,11 @@ const styles = StyleSheet.create({
   editCategoryInput: {
     flex: 1,
     backgroundColor: Colors.white,
-    borderRadius: 8,
+    borderRadius: mediumScale(8),
     padding: Spacing.sm,
-    fontSize: 16,
+    fontSize: mediumScale(16),
     color: Colors.textPrimary,
-    borderWidth: 1,
+    borderWidth: mediumScale(1),
     borderColor: Colors.primary,
   },
 });

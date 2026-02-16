@@ -1,4 +1,5 @@
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { widthScale, heightScale, mediumScale } from '../constants/size';
 
 interface ButtonProps {
   title: string;
@@ -41,49 +42,49 @@ export default function Button({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 30,
+    borderRadius: mediumScale(30),
     alignItems: 'center',
     justifyContent: 'center',
   },
   primary: {
     backgroundColor: '#006FFD',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: heightScale(2) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: mediumScale(4),
     elevation: 3,
   },
   secondary: {
     backgroundColor: '#2897FF',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: heightScale(2) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: mediumScale(4),
     elevation: 3,
   },
   outline: {
     backgroundColor: 'transparent',
-    borderWidth: 2,
+    borderWidth: mediumScale(2),
     borderColor: '#006FFD',
     elevation: 0,
   },
   small: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: widthScale(20),
+    paddingVertical: heightScale(10),
   },
   medium: {
-    paddingHorizontal: 40,
-    paddingVertical: 15,
+    paddingHorizontal: widthScale(40),
+    paddingVertical: heightScale(15),
   },
   large: {
-    paddingHorizontal: 80,
-    paddingVertical: 18,
+    paddingHorizontal: widthScale(80),
+    paddingVertical: heightScale(18),
   },
   fullWidth: {
     width: '100%',
   },
   text: {
-    fontSize: 18,
+    fontSize: mediumScale(18),
     fontWeight: '600',
   },
   primaryText: {

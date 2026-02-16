@@ -1,4 +1,5 @@
 import { Image, ImageStyle, StyleSheet } from 'react-native';
+import { mediumScale } from '../constants/size';
 
 export type IconName =
   | 'add'
@@ -112,7 +113,7 @@ const iconMap: Record<IconName, any> = {
   'warning': require('../assets/icons/Warning.png'),
 };
 
-export default function Icon({ name, size = 24, color, style }: IconProps) {
+export default function Icon({ name, size = mediumScale(24), color, style }: IconProps) {
   return (
     <Image
       source={iconMap[name]}
@@ -124,7 +125,7 @@ export default function Icon({ name, size = 24, color, style }: IconProps) {
 
 const styles = StyleSheet.create({
   icon: {
-    width: 24,
-    height: 24,
+    width: mediumScale(24),
+    height: mediumScale(24),
   },
 });

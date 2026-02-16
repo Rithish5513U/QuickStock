@@ -17,6 +17,7 @@ import CustomerDetailsScreen from './screens/Customers/CustomerDetailsScreen';
 import MoreScreen from './screens/More/MoreScreen';
 import Icon from './components/Icon';
 import { Colors } from './constants/colors';
+import { heightScale, mediumScale } from './constants/size';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -94,14 +95,14 @@ function MainTabs() {
         tabBarInactiveTintColor: Colors.textLight,
         tabBarStyle: {
           backgroundColor: Colors.white,
-          borderTopWidth: 1,
+          borderTopWidth: mediumScale(1),
           borderTopColor: '#E0E0E0',
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
+          height: heightScale(60),
+          paddingBottom: heightScale(8),
+          paddingTop: heightScale(8),
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: mediumScale(12),
           fontWeight: '600',
         },
       })}
@@ -113,10 +114,10 @@ function MainTabs() {
         component={BillScreen}
         options={{
           tabBarIconStyle: {
-            marginTop: -10,
+            marginTop: heightScale(-10),
           },
           tabBarLabelStyle: {
-            fontSize: 12,
+            fontSize: mediumScale(12),
             fontWeight: '700',
           },
         }}

@@ -3,6 +3,7 @@ import Typography from './Typography';
 import Icon from './Icon';
 import { Colors } from '../constants/colors';
 import { Spacing } from '../constants/spacing';
+import { mediumScale } from '../constants/size';
 
 interface BottomSheetModalProps {
   visible: boolean;
@@ -36,7 +37,7 @@ export default function BottomSheetModal({
           <View style={styles.header}>
             <Typography variant="h3">{title}</Typography>
             <TouchableOpacity onPress={onClose}>
-              <Icon name="close" size={24} />
+              <Icon name="close" size={mediumScale(24)} />
             </TouchableOpacity>
           </View>
           <ScrollView style={styles.body}>
@@ -56,8 +57,8 @@ const styles = StyleSheet.create({
   },
   content: {
     backgroundColor: Colors.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: mediumScale(20),
+    borderTopRightRadius: mediumScale(20),
     paddingTop: Spacing.lg,
   },
   header: {
@@ -66,7 +67,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.md,
-    borderBottomWidth: 1,
+    borderBottomWidth: mediumScale(1),
     borderBottomColor: Colors.background,
   },
   body: {

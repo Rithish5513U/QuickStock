@@ -12,6 +12,7 @@ import Card from '../../components/Card';
 import EmptyState from '../../components/EmptyState';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
+import { widthScale, heightScale, mediumScale } from '../../constants/size';
 
 interface CustomerAnalytics {
   name: string;
@@ -133,7 +134,7 @@ export default function CustomerAnalyticsScreen() {
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          <Icon name="search" size={20} style={styles.searchIcon} />
+          <Icon name="search" size={mediumScale(20)} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search customers..."
@@ -243,7 +244,7 @@ export default function CustomerAnalyticsScreen() {
 
                 {/* Last Visit */}
                 <View style={styles.lastVisit}>
-                  <Icon name="info" size={14} style={{ tintColor: Colors.textLight }} />
+                  <Icon name="info" size={mediumScale(14)} style={{ tintColor: Colors.textLight }} />
                   <Typography variant="caption" color={Colors.textLight}>
                     Last visit: {formatDate(customer.lastVisit)}
                   </Typography>
@@ -289,10 +290,10 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.xl + 20,
+    paddingTop: Spacing.xl + heightScale(20),
     paddingBottom: Spacing.md,
     backgroundColor: Colors.white,
-    borderBottomWidth: 1,
+    borderBottomWidth: mediumScale(1),
     borderBottomColor: '#E0E0E0',
   },
   statsContainer: {
@@ -300,7 +301,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
-    borderBottomWidth: 1,
+    borderBottomWidth: mediumScale(1),
     borderBottomColor: '#E0E0E0',
   },
   statBox: {
@@ -316,9 +317,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.background,
-    borderRadius: 12,
+    borderRadius: mediumScale(12),
     paddingHorizontal: Spacing.md,
-    height: 48,
+    height: heightScale(48),
   },
   searchIcon: {
     tintColor: Colors.textLight,
@@ -326,21 +327,21 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: mediumScale(16),
     color: Colors.textPrimary,
   },
   sortContainer: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     backgroundColor: Colors.white,
-    borderBottomWidth: 1,
+    borderBottomWidth: mediumScale(1),
     borderBottomColor: '#E0E0E0',
   },
   sortButton: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    borderRadius: 20,
-    borderWidth: 1,
+    borderRadius: mediumScale(20),
+    borderWidth: mediumScale(1),
     borderColor: Colors.primary,
     marginRight: Spacing.sm,
   },
@@ -366,22 +367,22 @@ const styles = StyleSheet.create({
   frequencyBadge: {
     backgroundColor: Colors.light,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingVertical: heightScale(4),
+    borderRadius: mediumScale(12),
   },
   customerStats: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: Spacing.md,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
+    borderTopWidth: mediumScale(1),
+    borderBottomWidth: mediumScale(1),
     borderColor: '#E0E0E0',
   },
   statItem: {
     alignItems: 'center',
   },
   statDivider: {
-    width: 1,
+    width: widthScale(1),
     backgroundColor: '#E0E0E0',
   },
   lastVisit: {
@@ -404,8 +405,8 @@ const styles = StyleSheet.create({
   productTag: {
     backgroundColor: Colors.background,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: heightScale(4),
+    borderRadius: mediumScale(8),
   },
   bottomSpacing: {
     height: Spacing.xl,

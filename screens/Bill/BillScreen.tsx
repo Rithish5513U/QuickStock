@@ -12,6 +12,7 @@ import Card from '../../components/Card';
 import Button from '../../components/Button';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
+import { widthScale, heightScale, mediumScale } from '../../constants/size';
 import { Product, Invoice, InvoiceItem, Customer } from '../../models';
 import { ProductService, InvoiceService, CustomerService } from '../../services';
 
@@ -643,7 +644,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: Spacing.lg,
-    paddingTop: 60,
+    paddingTop: heightScale(60),
     backgroundColor: Colors.white,
   },
   scrollView: {
@@ -668,8 +669,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
-    borderRadius: 20,
-    gap: 4,
+    borderRadius: mediumScale(20),
+    gap: mediumScale(4),
   },
   addButtonText: {
     color: Colors.white,
@@ -679,14 +680,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: Spacing.xxl,
     backgroundColor: Colors.background,
-    borderRadius: 12,
-    borderWidth: 2,
+    borderRadius: mediumScale(12),
+    borderWidth: mediumScale(2),
     borderColor: Colors.primary,
     borderStyle: 'dashed',
   },
   cameraContainer: {
-    height: 250,
-    borderRadius: 12,
+    height: heightScale(250),
+    borderRadius: mediumScale(12),
     overflow: 'hidden',
   },
   camera: {
@@ -697,7 +698,7 @@ const styles = StyleSheet.create({
     top: Spacing.md,
     right: Spacing.md,
     backgroundColor: 'rgba(0,0,0,0.6)',
-    borderRadius: 20,
+    borderRadius: mediumScale(20),
     padding: Spacing.sm,
   },
   section: {
@@ -716,7 +717,7 @@ const styles = StyleSheet.create({
   },
   itemName: {
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: mediumScale(4),
   },
   itemRight: {
     flexDirection: 'row',
@@ -725,27 +726,27 @@ const styles = StyleSheet.create({
   },
   qtyButton: {
     backgroundColor: Colors.background,
-    borderRadius: 6,
+    borderRadius: mediumScale(6),
     padding: Spacing.xs,
-    width: 28,
-    height: 28,
+    width: widthScale(28),
+    height: heightScale(28),
     alignItems: 'center',
     justifyContent: 'center',
   },
   qtyInput: {
     backgroundColor: Colors.background,
-    borderRadius: 6,
+    borderRadius: mediumScale(6),
     padding: Spacing.xs,
-    width: 50,
+    width: widthScale(50),
     textAlign: 'center',
   },
   itemTotal: {
     fontWeight: '600',
-    minWidth: 60,
+    minWidth: widthScale(60),
     textAlign: 'right',
   },
   divider: {
-    height: 1,
+    height: heightScale(1),
     backgroundColor: Colors.background,
     marginVertical: Spacing.md,
   },
@@ -758,7 +759,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   totalRow: {
-    borderTopWidth: 2,
+    borderTopWidth: mediumScale(2),
     borderTopColor: Colors.primary,
     paddingTop: Spacing.md,
     marginTop: Spacing.sm,
@@ -776,8 +777,8 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: Colors.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: mediumScale(20),
+    borderTopRightRadius: mediumScale(20),
     maxHeight: '85%',
     paddingTop: Spacing.lg,
   },
@@ -797,10 +798,10 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: Colors.background,
-    borderRadius: 8,
+    borderRadius: mediumScale(8),
     padding: Spacing.md,
     marginBottom: Spacing.md,
-    fontSize: 16,
+    fontSize: mediumScale(16),
   },
   invoiceInfo: {
     marginBottom: Spacing.md,

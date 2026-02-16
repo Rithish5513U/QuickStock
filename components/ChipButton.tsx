@@ -3,6 +3,7 @@ import Typography from './Typography';
 import Icon from './Icon';
 import { Colors } from '../constants/colors';
 import { Spacing } from '../constants/spacing';
+import { mediumScale } from '../constants/size';
 
 interface ChipButtonProps {
   label: string;
@@ -22,7 +23,7 @@ export default function ChipButton({ label, active = false, onPress, icon, style
       ]}
       onPress={onPress}
     >
-      {icon && <Icon name={icon as any} size={16} color={active ? Colors.white : Colors.primary} />}
+      {icon && <Icon name={icon as any} size={mediumScale(16)} color={active ? Colors.white : Colors.primary} />}
       <Typography
         variant="caption"
         color={active ? Colors.white : Colors.textPrimary}
@@ -30,7 +31,7 @@ export default function ChipButton({ label, active = false, onPress, icon, style
       >
         {label}
       </Typography>
-      {active && <Icon name="check" size={16} color={Colors.white} />}
+      {active && <Icon name="check" size={mediumScale(16)} color={Colors.white} />}
     </TouchableOpacity>
   );
 }
@@ -42,8 +43,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     backgroundColor: Colors.background,
-    borderRadius: 20,
-    borderWidth: 1,
+    borderRadius: mediumScale(20),
+    borderWidth: mediumScale(1),
     borderColor: Colors.background,
     gap: Spacing.xs,
   },

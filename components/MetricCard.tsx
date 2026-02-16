@@ -2,6 +2,7 @@ import { View, StyleSheet } from 'react-native';
 import Typography from './Typography';
 import { Colors } from '../constants/colors';
 import { Spacing } from '../constants/spacing';
+import { widthScale, heightScale, mediumScale } from '../constants/size';
 
 interface MetricCardProps {
   label: string;
@@ -39,9 +40,9 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   icon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: widthScale(40),
+    height: heightScale(40),
+    borderRadius: mediumScale(20),
     backgroundColor: Colors.background,
     justifyContent: 'center',
     alignItems: 'center',

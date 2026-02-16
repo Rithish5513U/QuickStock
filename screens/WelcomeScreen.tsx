@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Button from '../components/Button';
 import Typography from '../components/Typography';
 import { Colors } from '../constants/colors';
+import { heightScale, mediumScale } from '../constants/size';
 
 export default function WelcomeScreen({ navigation }: any) {
   const imageAnim = useRef(new Animated.Value(300)).current;
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
   imageWrapper: {
     width: '100%',
     height: '100%',
-    borderRadius: 30,
+    borderRadius: mediumScale(30),
     overflow: 'hidden',
   },
   image: {
@@ -140,25 +141,25 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 30,
-    paddingHorizontal: 25,
+    paddingVertical: heightScale(30),
+    paddingHorizontal: mediumScale(25),
   },
   textContainer: {
     alignItems: 'center',
     width: '100%',
   },
   subtitle: {
-    marginBottom: 10,
-    marginTop: 5,
+    marginBottom: heightScale(10),
+    marginTop: heightScale(5),
   },
   description: {
-    marginBottom: 15,
-    paddingHorizontal: 10,
-    marginTop: 20
+    marginBottom: heightScale(15),
+    paddingHorizontal: mediumScale(10),
+    marginTop: heightScale(20)
   },
   getStartedText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: mediumScale(18),
     fontWeight: '600',
   },
 });

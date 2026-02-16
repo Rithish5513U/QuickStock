@@ -11,6 +11,7 @@ import Card from '../../components/Card';
 import EmptyState from '../../components/EmptyState';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
+import { widthScale, heightScale, mediumScale } from '../../constants/size';
 import { Invoice } from '../../models';
 import { InvoiceService } from '../../services';
 
@@ -213,9 +214,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: Spacing.lg,
-    paddingTop: 60,
+    paddingTop: heightScale(60),
     backgroundColor: Colors.white,
-    borderBottomWidth: 1,
+    borderBottomWidth: mediumScale(1),
     borderBottomColor: Colors.background,
   },
   backButton: {
@@ -238,18 +239,18 @@ const styles = StyleSheet.create({
   },
   invoiceNumber: {
     fontWeight: '700',
-    fontSize: 16,
-    marginBottom: 4,
+    fontSize: mediumScale(16),
+    marginBottom: mediumScale(4),
   },
   customerName: {
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: mediumScale(4),
   },
   invoiceRight: {
     alignItems: 'flex-end',
   },
   profitText: {
-    marginTop: 4,
+    marginTop: mediumScale(4),
     fontWeight: '600',
   },
   invoiceActions: {
@@ -267,6 +268,6 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
     padding: Spacing.sm,
     backgroundColor: Colors.background,
-    borderRadius: 8,
+    borderRadius: mediumScale(8),
   },
 });

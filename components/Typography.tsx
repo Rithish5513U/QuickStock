@@ -1,4 +1,5 @@
 import { Text, StyleSheet, TextStyle } from 'react-native';
+import { mediumScale } from '../constants/size';
 
 interface TypographyProps {
   children: React.ReactNode;
@@ -29,32 +30,32 @@ export default function Typography({
 
 const styles = StyleSheet.create({
   h1: {
-    fontSize: 40,
+    fontSize: mediumScale(40),
     fontWeight: 'bold',
     color: '#006FFD',
     letterSpacing: 0.5,
   },
   h2: {
-    fontSize: 32,
+    fontSize: mediumScale(32),
     fontWeight: 'bold',
     color: '#006FFD',
   },
   h3: {
-    fontSize: 20,
+    fontSize: mediumScale(20),
     fontWeight: 'bold',
     color: '#000000',
   },
   body: {
-    fontSize: 14,
+    fontSize: mediumScale(14),
     color: '#666666',
-    lineHeight: 20,
+    lineHeight: mediumScale(20),
   },
   caption: {
-    fontSize: 12,
+    fontSize: mediumScale(12),
     color: '#999999',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: mediumScale(16),
     color: '#666666',
   },
 });

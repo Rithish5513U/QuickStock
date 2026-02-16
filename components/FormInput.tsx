@@ -2,6 +2,7 @@ import { View, TextInput, StyleSheet, Text, TextInputProps } from 'react-native'
 import Typography from './Typography';
 import { Colors } from '../constants/colors';
 import { Spacing } from '../constants/spacing';
+import { mediumScale } from '../constants/size';
 
 interface FormInputProps extends TextInputProps {
   label: string;
@@ -49,11 +50,11 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: Colors.background,
-    borderRadius: 8,
+    borderRadius: mediumScale(8),
     padding: Spacing.md,
-    fontSize: 16,
+    fontSize: mediumScale(16),
     color: Colors.textPrimary,
-    borderWidth: 1,
+    borderWidth: mediumScale(1),
     borderColor: Colors.background,
   },
   inputError: {

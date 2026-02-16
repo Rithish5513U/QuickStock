@@ -11,6 +11,7 @@ import Card from '../../components/Card';
 import EmptyState from '../../components/EmptyState';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
+import { widthScale, heightScale, mediumScale } from '../../constants/size';
 
 export default function SelectProductScreen({ navigation, route }: any) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -292,7 +293,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: Spacing.lg,
-    paddingTop: 60,
+    paddingTop: heightScale(60),
     backgroundColor: Colors.white,
   },
   backButton: {
@@ -311,21 +312,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.background,
-    borderRadius: 8,
+    borderRadius: mediumScale(8),
     paddingHorizontal: Spacing.md,
     gap: Spacing.sm,
   },
   searchInput: {
     flex: 1,
     paddingVertical: Spacing.md,
-    fontSize: 16,
+    fontSize: mediumScale(16),
     color: Colors.textPrimary,
   },
   filterButton: {
-    width: 48,
-    height: 48,
+    width: widthScale(48),
+    height: heightScale(48),
     backgroundColor: Colors.background,
-    borderRadius: 8,
+    borderRadius: mediumScale(8),
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
@@ -335,19 +336,19 @@ const styles = StyleSheet.create({
   },
   filterBadge: {
     position: 'absolute',
-    top: -4,
-    right: -4,
+    top: mediumScale(-4),
+    right: mediumScale(-4),
     backgroundColor: Colors.danger,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
+    borderRadius: mediumScale(10),
+    minWidth: widthScale(20),
+    height: heightScale(20),
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: mediumScale(4),
   },
   filterBadgeText: {
     color: Colors.white,
-    fontSize: 12,
+    fontSize: mediumScale(12),
     fontWeight: '600',
   },
   scrollView: {
@@ -377,7 +378,7 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: mediumScale(4),
   },
   productCategory: {
     marginBottom: Spacing.xs,
@@ -386,7 +387,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
-    marginTop: 4,
+    marginTop: mediumScale(4),
   },
   productPrice: {
     fontWeight: '600',
@@ -395,8 +396,8 @@ const styles = StyleSheet.create({
   stockBadge: {
     backgroundColor: Colors.success + '20',
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingVertical: mediumScale(2),
+    borderRadius: mediumScale(4),
   },
   stockBadgeLow: {
     backgroundColor: Colors.warning + '20',
@@ -405,7 +406,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.danger + '20',
   },
   stockText: {
-    fontSize: 12,
+    fontSize: mediumScale(12),
     fontWeight: '600',
   },
   modalOverlay: {
@@ -415,8 +416,8 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: Colors.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: mediumScale(20),
+    borderTopRightRadius: mediumScale(20),
     maxHeight: '80%',
   },
   modalHeader: {
@@ -446,8 +447,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     backgroundColor: Colors.background,
-    borderRadius: 20,
-    borderWidth: 1,
+    borderRadius: mediumScale(20),
+    borderWidth: mediumScale(1),
     borderColor: Colors.background,
   },
   chipActive: {
@@ -466,8 +467,8 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: mediumScale(8),
+    borderWidth: mediumScale(1),
     borderColor: Colors.primary,
   },
   applyButton: {
@@ -475,7 +476,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 8,
+    borderRadius: mediumScale(8),
     backgroundColor: Colors.primary,
   },
 });

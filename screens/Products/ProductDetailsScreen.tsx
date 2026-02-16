@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
 import { Product, Invoice, InvoiceItem } from '../../models';
 import { ProductService, AnalyticsService } from '../../services';
+import { widthScale, heightScale, mediumScale } from '../../constants/size';
 
 type RootStackParamList = {
   ProductDetails: { productId: string };
@@ -281,7 +282,7 @@ export default function ProductDetailsScreen() {
           </View>
         </Card>
 
-        <View style={{ height: 100 }} />
+        <View style={{ height: heightScale(100) }} />
       </ScrollView>
 
       {/* Bottom Actions */}
@@ -314,9 +315,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: Spacing.lg,
-    paddingTop: 60,
+    paddingTop: heightScale(60),
     backgroundColor: Colors.white,
-    borderBottomWidth: 1,
+    borderBottomWidth: mediumScale(1),
     borderBottomColor: Colors.background,
   },
   backButton: {
@@ -352,7 +353,7 @@ const styles = StyleSheet.create({
   statusBadge: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
-    borderRadius: 16,
+    borderRadius: mediumScale(16),
   },
   infoGrid: {
     flexDirection: 'row',
@@ -367,7 +368,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   divider: {
-    height: 1,
+    height: mediumScale(1),
     backgroundColor: Colors.background,
     marginVertical: Spacing.md,
   },
@@ -397,19 +398,19 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     padding: Spacing.lg,
     backgroundColor: Colors.white,
-    borderTopWidth: 1,
+    borderTopWidth: mediumScale(1),
     borderTopColor: Colors.background,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
+    shadowOffset: { width: 0, height: heightScale(-2) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: mediumScale(4),
     elevation: 5,
   },
   deleteButton: {
-    width: 56,
-    height: 48,
+    width: widthScale(56),
+    height: heightScale(48),
     backgroundColor: `${Colors.danger}15`,
-    borderRadius: 8,
+    borderRadius: mediumScale(8),
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -426,7 +427,7 @@ const styles = StyleSheet.create({
   stockItem: {
     flex: 1,
     minWidth: '45%',
-    gap: 4,
+    gap: mediumScale(4),
   },
   stockValueRow: {
     flexDirection: 'row',
@@ -434,13 +435,13 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   stockIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: widthScale(8),
+    height: heightScale(8),
+    borderRadius: mediumScale(4),
   },
   transactionCard: {
     paddingVertical: Spacing.md,
-    borderBottomWidth: 1,
+    borderBottomWidth: mediumScale(1),
     borderBottomColor: Colors.background,
   },
   transactionHeader: {
@@ -450,7 +451,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   transactionDetails: {
-    gap: 4,
+    gap: mediumScale(4),
   },
   transactionRow: {
     flexDirection: 'row',

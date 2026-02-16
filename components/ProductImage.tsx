@@ -1,5 +1,6 @@
 import { Image, StyleSheet, View } from 'react-native';
 import Icon from './Icon';
+import { mediumScale } from '../constants/size';
 
 interface ProductImageProps {
   imageUri?: string;
@@ -7,8 +8,9 @@ interface ProductImageProps {
 }
 
 export default function ProductImage({ imageUri, size = 60 }: ProductImageProps) {
+  const responsiveSize = mediumScale(size);
   return (
-    <View style={[styles.container, { width: size, height: size }]}>
+    <View style={[styles.container, { width: responsiveSize, height: responsiveSize }]}>
       {imageUri ? (
         <Image 
           source={{ uri: imageUri }} 
@@ -16,7 +18,7 @@ export default function ProductImage({ imageUri, size = 60 }: ProductImageProps)
           resizeMode="cover"
         />
       ) : (
-        <Icon name="placeholder" size={size * 0.5} style={styles.placeholderIcon} />
+        <Icon name="placeholder" size={responsiveSize * 0.5} style={styles.placeholderIcon} />
       )}
     </View>
   );
@@ -25,7 +27,7 @@ export default function ProductImage({ imageUri, size = 60 }: ProductImageProps)
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#F5F5F5',
-    borderRadius: 12,
+    borderRadius: mediumScale(12),
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',

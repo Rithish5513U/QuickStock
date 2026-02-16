@@ -1,4 +1,5 @@
 import { View, StyleSheet, ViewStyle } from 'react-native';
+import { mediumScale, heightScale } from '../constants/size';
 
 interface CardProps {
   children: React.ReactNode;
@@ -16,12 +17,12 @@ export default function Card({ children, style, backgroundColor = '#FFFFFF' }: C
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 15,
-    padding: 20,
+    borderRadius: mediumScale(15),
+    padding: mediumScale(20),
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: heightScale(2) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: mediumScale(4),
     elevation: 3,
   },
 });

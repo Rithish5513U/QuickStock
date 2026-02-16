@@ -6,6 +6,7 @@ import ProductImage from './ProductImage';
 import { Colors } from '../constants/colors';
 import { Spacing } from '../constants/spacing';
 import { Product } from '../models';
+import { widthScale, heightScale, mediumScale } from '../constants/size';
 
 interface ProductCardProps {
   product: Product;
@@ -37,7 +38,7 @@ export default function ProductCard({ product, onEdit, onDelete, onPress }: Prod
         activeOpacity={0.7}
       >
         <View style={styles.productRow}>
-          <ProductImage imageUri={product.image} size={60} />
+          <ProductImage imageUri={product.image} size={widthScale(60)} />
           
           <View style={styles.productInfo}>
             <View style={styles.nameRow}>
@@ -75,13 +76,13 @@ export default function ProductCard({ product, onEdit, onDelete, onPress }: Prod
                   style={styles.actionButton}
                   onPress={() => onEdit?.(product)}
                 >
-                  <Icon name="edit" size={18} style={{ tintColor: Colors.primary }} />
+                  <Icon name="edit" size={mediumScale(18)} style={{ tintColor: Colors.primary }} />
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.actionButton}
                   onPress={() => onDelete?.(product)}
                 >
-                  <Icon name="delete-bin" size={18} style={{ tintColor: Colors.danger }} />
+                  <Icon name="delete-bin" size={mediumScale(18)} style={{ tintColor: Colors.danger }} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -113,13 +114,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   productName: {
-    marginBottom: 2,
-    fontSize: 16,
+    marginBottom: heightScale(2),
+    fontSize: mediumScale(16),
   },
   stockIndicator: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: widthScale(12),
+    height: heightScale(12),
+    borderRadius: mediumScale(6),
     marginLeft: Spacing.sm,
   },
   stockGreen: {
@@ -137,12 +138,12 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   productDetailItem: {
-    minWidth: 60,
+    minWidth: widthScale(60),
   },
   productDetailValue: {
     fontWeight: '600',
-    marginTop: 2,
-    fontSize: 13,
+    marginTop: heightScale(2),
+    fontSize: mediumScale(13),
   },
   productActions: {
     flexDirection: 'row',

@@ -14,6 +14,7 @@ import Card from '../../components/Card';
 import EmptyState from '../../components/EmptyState';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
+import { widthScale, heightScale, mediumScale } from '../../constants/size';
 
 type RootStackParamList = {
   CustomerDetails: { customerPhone: string };
@@ -232,7 +233,7 @@ export default function CustomerDetailsScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Icon name="arrow-left" size={24} />
+            <Icon name="arrow-left" size={mediumScale(24)} />
           </TouchableOpacity>
           <Typography variant="h2">Customer Not Found</Typography>
         </View>
@@ -251,7 +252,7 @@ export default function CustomerDetailsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-left" size={24} />
+          <Icon name="arrow-left" size={mediumScale(24)} />
         </TouchableOpacity>
         <View style={styles.headerTitle}>
           <Typography variant="h2">{customerName}</Typography>
@@ -343,13 +344,13 @@ export default function CustomerDetailsScreen() {
                     onPress={() => handleDownloadInvoice(invoice)}
                     style={styles.actionButton}
                   >
-                    <Icon name="send" size={20} style={{ tintColor: Colors.primary }} />
+                    <Icon name="send" size={mediumScale(20)} style={{ tintColor: Colors.primary }} />
                   </TouchableOpacity>
                   <TouchableOpacity 
                     onPress={() => handleDeleteInvoice(invoice)}
                     style={styles.actionButton}
                   >
-                    <Icon name="close" size={20} style={{ tintColor: Colors.danger }} />
+                    <Icon name="close" size={mediumScale(20)} style={{ tintColor: Colors.danger }} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -396,10 +397,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.xl + 20,
+    paddingTop: Spacing.xl + heightScale(20),
     paddingBottom: Spacing.md,
     backgroundColor: Colors.white,
-    borderBottomWidth: 1,
+    borderBottomWidth: mediumScale(1),
     borderBottomColor: '#E0E0E0',
   },
   backButton: {
@@ -452,7 +453,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.lg,
     paddingTop: Spacing.sm,
-    borderTopWidth: 1,
+    borderTopWidth: mediumScale(1),
     borderTopColor: '#E0E0E0',
   },
   productStat: {
@@ -476,8 +477,8 @@ const styles = StyleSheet.create({
   },
   invoiceItems: {
     paddingVertical: Spacing.sm,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
+    borderTopWidth: mediumScale(1),
+    borderBottomWidth: mediumScale(1),
     borderColor: '#E0E0E0',
     gap: Spacing.xs,
   },

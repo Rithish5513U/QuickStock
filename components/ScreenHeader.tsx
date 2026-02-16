@@ -3,6 +3,7 @@ import Typography from './Typography';
 import Icon from './Icon';
 import { Colors } from '../constants/colors';
 import { Spacing } from '../constants/spacing';
+import { mediumScale, heightScale } from '../constants/size';
 
 interface ScreenHeaderProps {
   title: string;
@@ -23,7 +24,7 @@ export default function ScreenHeader({
     <View style={styles.header}>
       {showBackButton && onBack && (
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <Icon name="arrow-left" size={24} />
+          <Icon name="arrow-left" size={mediumScale(24)} />
         </TouchableOpacity>
       )}
       <View style={styles.titleContainer}>
@@ -44,10 +45,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.xl + 20,
+    paddingTop: Spacing.xl + heightScale(20),
     paddingBottom: Spacing.md,
     backgroundColor: Colors.white,
-    borderBottomWidth: 1,
+    borderBottomWidth: mediumScale(1),
     borderBottomColor: '#E0E0E0',
   },
   backButton: {

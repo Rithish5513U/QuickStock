@@ -13,6 +13,7 @@ import Icon from '../../components/Icon';
 import ProductCard from '../../components/ProductCard';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
+import { widthScale, heightScale, mediumScale } from '../../constants/size';
 import { Product } from '../../models';
 import { ProductService, AnalyticsService } from '../../services';
 
@@ -533,10 +534,10 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: Spacing.lg,
-    paddingTop: 60,
+    paddingTop: heightScale(60),
     backgroundColor: Colors.white,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+    borderBottomLeftRadius: mediumScale(30),
+    borderBottomRightRadius: mediumScale(30),
     marginBottom: Spacing.lg,
   },
   statsContainer: {
@@ -568,9 +569,9 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   alertDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: widthScale(8),
+    height: heightScale(8),
+    borderRadius: mediumScale(4),
   },
   alertAction: {
     marginTop: Spacing.sm,
@@ -589,7 +590,7 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
   },
   actionButtonText: {
-    fontSize: 16,
+    fontSize: mediumScale(16),
     fontWeight: '600',
   },
   viewAllButton: {
@@ -609,7 +610,7 @@ const styles = StyleSheet.create({
   },
   chartTitle: {
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: mediumScale(14),
     color: Colors.textPrimary,
   },
   pickerContainer: {
@@ -620,15 +621,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.background,
     paddingHorizontal: Spacing.xs,
-    borderRadius: 8,
-    height: 36,
-    width: 130,
+    borderRadius: mediumScale(8),
+    height: heightScale(36),
+    width: widthScale(130),
   },
   picker: {
     flex: 1,
     color: Colors.primary,
   },
   chart: {
-    borderRadius: 16,
+    borderRadius: mediumScale(16),
   },
 });

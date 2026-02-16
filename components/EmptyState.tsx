@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import Card from './Card';
+import { widthScale, heightScale, mediumScale } from '../constants/size';
 
 interface EmptyStateProps {
   title: string;
@@ -17,17 +18,17 @@ export default function EmptyState({ title, message }: EmptyStateProps) {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 40,
+    padding: widthScale(40),
     alignItems: 'center',
   },
   title: {
-    fontSize: 16,
+    fontSize: mediumScale(16),
     color: '#666666',
     fontWeight: '600',
-    marginBottom: 5,
+    marginBottom: heightScale(5),
   },
   message: {
-    fontSize: 14,
+    fontSize: mediumScale(14),
     color: '#999999',
   },
 });

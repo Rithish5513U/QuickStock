@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import Card from './Card';
+import { widthScale, heightScale, mediumScale } from '../constants/size';
 
 interface StatCardProps {
   number: string | number;
@@ -19,16 +20,16 @@ export default function StatCard({ number, label, backgroundColor }: StatCardPro
 const styles = StyleSheet.create({
   statCard: {
     flex: 1,
-    marginHorizontal: 5,
+    marginHorizontal: widthScale(5),
   },
   statNumber: {
-    fontSize: 28,
+    fontSize: mediumScale(28),
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginBottom: 5,
+    marginBottom: heightScale(5),
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: mediumScale(12),
     color: '#FFFFFF',
     opacity: 0.9,
   },
