@@ -1,296 +1,20 @@
-import { StyleSheet, View, ScrollView, TouchableOpacity, Alert, Linking, Platform, Share, Modal, TextInput, Switch } from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity, Alert, Linking, Platform, Share, Modal, TextInput } from 'react-native';
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Notifications from 'expo-notifications';
 import { File, Directory, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import Typography from '../../components/Typography';
-import Card from '../../components/Card';
-import Button from '../../components/Button';
+import { Typography, Card, Button, Icon, MenuItem } from '../../components';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
-import Icon from '../../components/Icon';
 import { widthScale, heightScale, mediumScale } from '../../constants/size';
 import { ProductService, CategoryService, InvoiceService, CustomerService } from '../../services';
 
-const NOTIFICATION_SETTINGS_KEY = '@trendwise_notification_settings';
-const NOTIFICATION_ID_KEY = '@trendwise_notification_id';
-
-// Configure notification handler
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
-
-interface MenuItemProps {
-  icon: any;
-  title: string;
-  subtitle?: string;
-  onPress: () => void;
-  iconColor?: string;
-  danger?: boolean;
-}
-
-function MenuItem({ icon, title, subtitle, onPress, iconColor, danger }: MenuItemProps) {
-  return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-      <Card style={styles.menuItem}>
-        <View style={[styles.iconContainer, danger && styles.iconContainerDanger]}>
-          <Icon name={icon} size={mediumScale(24)} color={iconColor || (danger ? Colors.danger : Colors.primary)} />
-        </View>
-        <View style={styles.menuItemText}>
-          <Typography 
-            variant="body" 
-            style={styles.menuTitle}
-            color={danger ? Colors.danger : Colors.textPrimary}
-          >
-            {title}
-          </Typography>
-          {subtitle && (
-            <Typography variant="caption" color={Colors.textLight}>
-              {subtitle}
-            </Typography>
-          )}
-        </View>
-        <Icon name="arrow-right" size={mediumScale(20)} color={Colors.textLight} />
-      </Card>
-    </TouchableOpacity>
-  );
-}
-
-export default function MoreScreen() {
+export default function MoreScreen({ navigation }: any) {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [importText, setImportText] = useState('');
-  
-  // Notification settings state
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [notificationFrequency, setNotificationFrequency] = useState<'daily' | 'weekly' | 'monthly'>('daily');
-  const [selectedDays, setSelectedDays] = useState<string[]>(['mon', 'tue', 'wed', 'thu', 'fri']);
-  const [notificationTime, setNotificationTime] = useState(new Date(new Date().setHours(9, 0, 0, 0)));
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const [alertCriticalStock, setAlertCriticalStock] = useState(true);
-  const [alertLowStock, setAlertLowStock] = useState(true);
-  const [alertOutOfStock, setAlertOutOfStock] = useState(true);
-
-  // Load notification settings on mount
-  useEffect(() => {
-    loadNotificationSettings();
-    requestNotificationPermissions();
-    setupAndroidChannel();
-  }, []);
-
-  // Save settings and reschedule when they change
-  useEffect(() => {
-    if (notificationsEnabled) {
-      saveNotificationSettings();
-      scheduleNotifications();
-    } else {
-      cancelAllNotifications();
-    }
-  }, [
-    notificationsEnabled,
-    notificationFrequency,
-    selectedDays,
-    notificationTime,
-    alertCriticalStock,
-    alertLowStock,
-    alertOutOfStock,
-  ]);
-
-  const requestNotificationPermissions = async () => {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    
-    if (finalStatus !== 'granted') {
-      console.log('Notification permissions not granted');
-    }
-  };
-
-  const setupAndroidChannel = async () => {
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('stock-alerts', {
-        name: 'Stock Alerts',
-        importance: Notifications.AndroidImportance.HIGH,
-        sound: 'default',
-        vibrationPattern: [0, 250, 250, 250],
-      });
-    }
-  };
-
-  const loadNotificationSettings = async () => {
-    try {
-      const settings = await AsyncStorage.getItem(NOTIFICATION_SETTINGS_KEY);
-      if (settings) {
-        const parsed = JSON.parse(settings);
-        setNotificationsEnabled(parsed.enabled || false);
-        setNotificationFrequency(parsed.frequency || 'daily');
-        setSelectedDays(parsed.days || ['mon', 'tue', 'wed', 'thu', 'fri']);
-        if (parsed.time) {
-          const [hours, minutes] = parsed.time.split(':');
-          const date = new Date();
-          date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-          setNotificationTime(date);
-        }
-        setAlertCriticalStock(parsed.alertTypes?.criticalStock ?? true);
-        setAlertLowStock(parsed.alertTypes?.lowStock ?? true);
-        setAlertOutOfStock(parsed.alertTypes?.outOfStock ?? true);
-      }
-    } catch (error) {
-      console.error('Failed to load notification settings:', error);
-    }
-  };
-
-  const saveNotificationSettings = async () => {
-    try {
-      const settings = {
-        enabled: notificationsEnabled,
-        frequency: notificationFrequency,
-        days: selectedDays,
-        time: `${notificationTime.getHours()}:${notificationTime.getMinutes()}`,
-        alertTypes: {
-          criticalStock: alertCriticalStock,
-          lowStock: alertLowStock,
-          outOfStock: alertOutOfStock,
-        },
-      };
-      await AsyncStorage.setItem(NOTIFICATION_SETTINGS_KEY, JSON.stringify(settings));
-    } catch (error) {
-      console.error('Failed to save notification settings:', error);
-    }
-  };
-
-  const scheduleNotifications = async () => {
-    try {
-      // Cancel existing notifications first
-      await cancelAllNotifications();
-
-      if (!notificationsEnabled) return;
-
-      const hour = notificationTime.getHours();
-      const minute = notificationTime.getMinutes();
-
-      if (notificationFrequency === 'weekly') {
-        // For weekly, schedule for each selected day
-        const dayMap: { [key: string]: number } = {
-          sun: 1, mon: 2, tue: 3, wed: 4, thu: 5, fri: 6, sat: 7
-        };
-
-        for (const day of selectedDays) {
-          await Notifications.scheduleNotificationAsync({
-            content: {
-              title: 'Trendwise Stock Alert',
-              body: 'Time to check your inventory levels!',
-              data: { type: 'stock_check' },
-              ...(Platform.OS === 'android' && { channelId: 'stock-alerts' }),
-            },
-            trigger: {
-              weekday: dayMap[day],
-              hour: hour,
-              minute: minute,
-              repeats: true,
-              channelId: Platform.OS === 'android' ? 'stock-alerts' : undefined,
-            } as any,
-          });
-        }
-      } else if (notificationFrequency === 'daily') {
-        // Daily notification at specific time
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: 'Trendwise Stock Alert',
-            body: 'Time to check your inventory levels!',
-            data: { type: 'stock_check' },
-            ...(Platform.OS === 'android' && { channelId: 'stock-alerts' }),
-          },
-          trigger: {
-            hour: hour,
-            minute: minute,
-            repeats: true,
-            channelId: Platform.OS === 'android' ? 'stock-alerts' : undefined,
-          } as any,
-        });
-      } else if (notificationFrequency === 'monthly') {
-        // Monthly notification on the 1st of each month
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: 'Trendwise Stock Alert',
-            body: 'Time to check your inventory levels!',
-            data: { type: 'stock_check' },
-            ...(Platform.OS === 'android' && { channelId: 'stock-alerts' }),
-          },
-          trigger: {
-            day: 1,
-            hour: hour,
-            minute: minute,
-            repeats: true,
-            channelId: Platform.OS === 'android' ? 'stock-alerts' : undefined,
-          } as any,
-        });
-      }
-
-      Alert.alert(
-        'Notifications Scheduled',
-        `You will receive ${notificationFrequency} stock alerts at ${formatTime(notificationTime)}.`
-      );
-    } catch (error) {
-      console.error('Failed to schedule notifications:', error);
-      Alert.alert('Error', `Failed to schedule notifications. Please try again.\n\nError: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  };
-
-  const cancelAllNotifications = async () => {
-    try {
-      await Notifications.cancelAllScheduledNotificationsAsync();
-      await AsyncStorage.removeItem(NOTIFICATION_ID_KEY);
-      console.log('All notifications cancelled');
-    } catch (error) {
-      console.error('Failed to cancel notifications:', error);
-    }
-  };
-
-  const handleNotificationToggle = async (value: boolean) => {
-    setNotificationsEnabled(value);
-    
-    if (value) {
-      const { status } = await Notifications.getPermissionsAsync();
-      if (status !== 'granted') {
-        const { status: newStatus } = await Notifications.requestPermissionsAsync();
-        if (newStatus !== 'granted') {
-          Alert.alert(
-            'Permission Required',
-            'Please enable notifications in your device settings to receive stock alerts.',
-            [
-              { text: 'Cancel', onPress: () => setNotificationsEnabled(false) },
-              { text: 'Open Settings', onPress: () => Linking.openSettings() },
-            ]
-          );
-          return;
-        }
-      }
-      Alert.alert(
-        'Notifications Enabled',
-        'You will receive stock alerts based on your settings.'
-      );
-    } else {
-      Alert.alert(
-        'Notifications Disabled',
-        'Stock alert notifications have been turned off.'
-      );
-    }
-  };
 
   const handleExportData = async () => {
     Alert.alert(
@@ -308,27 +32,6 @@ export default function MoreScreen() {
         },
       ]
     );
-  };
-
-  const handleTimeChange = (event: any, selectedTime?: Date) => {
-    if (Platform.OS === 'android') {
-      setShowTimePicker(false);
-    }
-    if (selectedTime) {
-      setNotificationTime(selectedTime);
-      if (Platform.OS === 'ios') {
-        // On iOS, we keep the picker open
-      }
-    }
-  };
-
-  const formatTime = (date: Date) => {
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    const displayHours = hours % 12 || 12;
-    const displayMinutes = minutes.toString().padStart(2, '0');
-    return `${displayHours}:${displayMinutes} ${ampm}`;
   };
 
   const handleExportAsFile = async () => {
@@ -692,181 +395,12 @@ export default function MoreScreen() {
             NOTIFICATIONS
           </Typography>
           
-          <View style={styles.notificationContainer}>
-            <View style={styles.notificationRow}>
-              <View style={styles.notificationTextContainer}>
-                <Typography variant="body" style={styles.notificationTitle}>
-                  Enable Notifications
-                </Typography>
-                <Typography variant="caption" color={Colors.textLight}>
-                  Get alerts for stock levels
-                </Typography>
-              </View>
-              <Switch
-                value={notificationsEnabled}
-                onValueChange={handleNotificationToggle}
-                trackColor={{ false: Colors.textLight, true: Colors.secondary }}
-                thumbColor={notificationsEnabled ? Colors.primary : Colors.white}
-              />
-            </View>
-            
-            {notificationsEnabled && (
-              <>
-                <View style={styles.divider} />
-                
-                <View style={styles.settingItem}>
-                  <Typography variant="body" style={styles.settingLabel}>
-                    Frequency
-                  </Typography>
-                  <View style={styles.frequencyButtons}>
-                    <TouchableOpacity
-                      style={[
-                        styles.frequencyButton,
-                        notificationFrequency === 'daily' && styles.frequencyButtonActive,
-                      ]}
-                      onPress={() => setNotificationFrequency('daily')}
-                    >
-                      <Typography
-                        variant="caption"
-                        color={notificationFrequency === 'daily' ? Colors.white : Colors.textSecondary}
-                        style={styles.frequencyButtonText}
-                      >
-                        Daily
-                      </Typography>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity
-                      style={[
-                        styles.frequencyButton,
-                        notificationFrequency === 'weekly' && styles.frequencyButtonActive,
-                      ]}
-                      onPress={() => setNotificationFrequency('weekly')}
-                    >
-                      <Typography
-                        variant="caption"
-                        color={notificationFrequency === 'weekly' ? Colors.white : Colors.textSecondary}
-                        style={styles.frequencyButtonText}
-                      >
-                        Weekly
-                      </Typography>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity
-                      style={[
-                        styles.frequencyButton,
-                        notificationFrequency === 'monthly' && styles.frequencyButtonActive,
-                      ]}
-                      onPress={() => setNotificationFrequency('monthly')}
-                    >
-                      <Typography
-                        variant="caption"
-                        color={notificationFrequency === 'monthly' ? Colors.white : Colors.textSecondary}
-                        style={styles.frequencyButtonText}
-                      >
-                        Monthly
-                      </Typography>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-                
-                {notificationFrequency === 'weekly' && (
-                  <View style={styles.settingItem}>
-                    <Typography variant="body" style={styles.settingLabel}>
-                      Select Days
-                    </Typography>
-                    <View style={styles.daysContainer}>
-                      {[
-                        { key: 'mon', label: 'Mon' },
-                        { key: 'tue', label: 'Tue' },
-                        { key: 'wed', label: 'Wed' },
-                        { key: 'thu', label: 'Thu' },
-                        { key: 'fri', label: 'Fri' },
-                        { key: 'sat', label: 'Sat' },
-                        { key: 'sun', label: 'Sun' },
-                      ].map((day) => (
-                        <TouchableOpacity
-                          key={day.key}
-                          style={[
-                            styles.dayButton,
-                            selectedDays.includes(day.key) && styles.dayButtonActive,
-                          ]}
-                          onPress={() => {
-                            if (selectedDays.includes(day.key)) {
-                              setSelectedDays(selectedDays.filter(d => d !== day.key));
-                            } else {
-                              setSelectedDays([...selectedDays, day.key]);
-                            }
-                          }}
-                        >
-                          <Typography
-                            variant="caption"
-                            color={selectedDays.includes(day.key) ? Colors.white : Colors.textSecondary}
-                            style={styles.dayButtonText}
-                          >
-                            {day.label}
-                          </Typography>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-                )}
-                
-                <TouchableOpacity
-                  style={styles.settingItem}
-                  onPress={() => setShowTimePicker(true)}
-                >
-                  <Typography variant="body" style={styles.settingLabel}>
-                    Notification Time
-                  </Typography>
-                  <Typography variant="body" style={styles.settingValue}>
-                    {formatTime(notificationTime)}
-                  </Typography>
-                </TouchableOpacity>
-                
-                <View style={styles.divider} />
-                
-                <Typography variant="body" style={styles.settingLabel}>
-                  Alert Types
-                </Typography>
-                
-                <View style={styles.alertTypeRow}>
-                  <Typography variant="caption" color={Colors.textSecondary}>
-                    Critical Stock (0 items)
-                  </Typography>
-                  <Switch
-                    value={alertCriticalStock}
-                    onValueChange={setAlertCriticalStock}
-                    trackColor={{ false: Colors.textLight, true: Colors.secondary }}
-                    thumbColor={alertCriticalStock ? Colors.primary : Colors.white}
-                  />
-                </View>
-                
-                <View style={styles.alertTypeRow}>
-                  <Typography variant="caption" color={Colors.textSecondary}>
-                    Low Stock (below minimum)
-                  </Typography>
-                  <Switch
-                    value={alertLowStock}
-                    onValueChange={setAlertLowStock}
-                    trackColor={{ false: Colors.textLight, true: Colors.secondary }}
-                    thumbColor={alertLowStock ? Colors.primary : Colors.white}
-                  />
-                </View>
-                
-                <View style={styles.alertTypeRow}>
-                  <Typography variant="caption" color={Colors.textSecondary}>
-                    Out of Stock
-                  </Typography>
-                  <Switch
-                    value={alertOutOfStock}
-                    onValueChange={setAlertOutOfStock}
-                    trackColor={{ false: Colors.textLight, true: Colors.secondary }}
-                    thumbColor={alertOutOfStock ? Colors.primary : Colors.white}
-                  />
-                </View>
-              </>
-            )}
-          </View>
+          <MenuItem
+            icon="alert"
+            title="Notification Settings"
+            subtitle="Manage stock alerts and reminders"
+            onPress={() => (navigation as any).navigate('NotificationSettings')}
+          />
         </View>
 
         <View style={styles.section}>
@@ -879,7 +413,7 @@ export default function MoreScreen() {
             title="Rate Trendwise"
             subtitle="Show us some love"
             onPress={handleRateApp}
-            iconColor="#FFB800"
+            iconColor={Colors.gold}
           />
           
           <MenuItem
@@ -957,54 +491,6 @@ export default function MoreScreen() {
           </View>
         </View>
       </Modal>
-
-      {showTimePicker && (
-        <Modal
-          visible={showTimePicker}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setShowTimePicker(false)}
-        >
-          <View style={styles.timePickerOverlay}>
-            <View style={styles.timePickerContent}>
-              <View style={styles.timePickerHeader}>
-                <Typography variant="h3" style={styles.timePickerTitle}>
-                  Select Time
-                </Typography>
-                {Platform.OS === 'ios' && (
-                  <TouchableOpacity onPress={() => setShowTimePicker(false)}>
-                    <Typography variant="body" color={Colors.primary} style={styles.doneButton}>
-                      Done
-                    </Typography>
-                  </TouchableOpacity>
-                )}
-              </View>
-              
-              <DateTimePicker
-                value={notificationTime}
-                mode="time"
-                is24Hour={false}
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={handleTimeChange}
-                style={styles.timePicker}
-              />
-              
-              {Platform.OS === 'android' && (
-                <View style={styles.androidButtonContainer}>
-                  <TouchableOpacity
-                    style={[styles.androidButton, styles.androidButtonCancel]}
-                    onPress={() => setShowTimePicker(false)}
-                  >
-                    <Typography variant="body" color={Colors.textPrimary}>
-                      Cancel
-                    </Typography>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          </View>
-        </Modal>
-      )}
     </View>
   );
 }
@@ -1020,7 +506,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.md,
     backgroundColor: Colors.white,
     borderBottomWidth: mediumScale(1),
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: Colors.border,
   },
   scrollView: {
     flex: 1,
@@ -1061,28 +547,9 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     marginBottom: Spacing.sm,
   },
-  iconContainer: {
-    width: mediumScale(40),
-    height: mediumScale(40),
-    borderRadius: mediumScale(20),
-    backgroundColor: Colors.light,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.md,
-  },
-  iconContainerDanger: {
-    backgroundColor: '#FFE5E5',
-  },
-  menuItemText: {
-    flex: 1,
-  },
-  menuTitle: {
-    fontWeight: '600',
-    marginBottom: heightScale(2),
-  },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: Colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.lg,
@@ -1224,7 +691,7 @@ const styles = StyleSheet.create({
   },
   timePickerOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: Colors.overlay,
     justifyContent: 'flex-end',
   },
   timePickerContent: {

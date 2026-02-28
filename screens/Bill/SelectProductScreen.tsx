@@ -5,10 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import React from 'react';
 import { Product } from '../../models';
 import { ProductService, CategoryService } from '../../services';
-import Typography from '../../components/Typography';
-import Icon from '../../components/Icon';
-import Card from '../../components/Card';
-import EmptyState from '../../components/EmptyState';
+import { Typography, Icon, Card, EmptyState } from '../../components';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
 import { widthScale, heightScale, mediumScale } from '../../constants/size';
@@ -411,7 +408,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: Colors.overlay,
     justifyContent: 'flex-end',
   },
   modalContent: {

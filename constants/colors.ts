@@ -18,4 +18,16 @@ export const Colors = {
   blue4: '#6FBAFF',
   blue5: '#92CBFF',
   blue6: '#B4DBFF',
+  
+  // Additional UI colors
+  border: '#E0E0E0',
+  overlay: 'rgba(0, 0, 0, 0.5)',
+  overlayLight: 'rgba(0, 0, 0, 0.3)',
+  gold: '#FFB800',
+  chartBlue: '#4A90E2',
+  chartRed: '#E94B3C',
+  chartGreen: '#6FCF97',
+  chartOrange: '#F2994A',
+  chartPurple: '#9B51E0',
+  chartCyan: '#56CCF2',
 };

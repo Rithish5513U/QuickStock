@@ -6,14 +6,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Product } from '../../models';
 import { ProductService, CategoryService } from '../../services';
-import Typography from '../../components/Typography';
-import Icon from '../../components/Icon';
-import EmptyState from '../../components/EmptyState';
-import ProductCard from '../../components/ProductCard';
-import Button from '../../components/Button';
-import SearchBar from '../../components/SearchBar';
-import BottomSheetModal from '../../components/BottomSheetModal';
-import ChipGroup from '../../components/ChipGroup';
+import { Typography, Icon, EmptyState, ProductCard, Button, SearchBar, BottomSheetModal, ChipGroup } from '../../components';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
 import { widthScale, heightScale, mediumScale } from '../../constants/size';
@@ -543,15 +536,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: Spacing.lg,
     bottom: Spacing.lg,
-    width: widthScale(56),
-    height: heightScale(56),
+    width: mediumScale(56),
+    height: mediumScale(56),
     borderRadius: mediumScale(28),
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
     shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: heightScale(4) },
+    shadowOffset: { width: 0, height: mediumScale(4) },
     shadowOpacity: 0.3,
     shadowRadius: mediumScale(8),
   },

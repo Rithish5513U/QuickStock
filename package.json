@@ -4,19 +4,22 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "apk": "cd android && gradlew.bat assembleRelease -PreactNativeArchitectures=arm64-v8a -x lint -x lintVitalRelease -x lintVitalAnalyzeRelease",
+    "apk:universal": "cd android && gradlew.bat assembleRelease -x lint -x lintVitalRelease -x lintVitalAnalyzeRelease"
   },
   "dependencies": {
+    "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/datetimepicker": "^8.6.0",
     "@react-native-picker/picker": "^2.11.1",
+    "@react-native-vector-icons/material-icons": "^12.4.0",
     "@react-navigation/bottom-tabs": "^7.12.0",
     "@react-navigation/native": "^7.1.28",
     "@react-navigation/native-stack": "^7.12.0",
     "expo": "^54.0.33",
-    "expo-barcode-scanner": "^13.0.1",
     "expo-camera": "^17.0.10",
     "expo-document-picker": "^14.0.8",
     "expo-file-system": "^19.0.21",

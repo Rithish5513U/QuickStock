@@ -18,7 +18,7 @@ export default function ProductImage({ imageUri, size = 60 }: ProductImageProps)
           resizeMode="cover"
         />
       ) : (
-        <Icon name="placeholder" size={responsiveSize * 0.5} style={styles.placeholderIcon} />
+        <Icon name="placeholder" size={responsiveSize * 0.5} color="#CCCCCC" />
       )}
     </View>
   );
@@ -35,8 +35,5 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
-  },
-  placeholderIcon: {
-    tintColor: '#CCCCCC',
   },
 });

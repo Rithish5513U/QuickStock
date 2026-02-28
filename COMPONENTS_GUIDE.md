@@ -192,6 +192,118 @@ This directory contains reusable UI components that reduce code duplication acro
 
 ---
 
+#### SettingRow
+**Purpose:** Reusable settings row with title, subtitle, and switch toggle.
+
+**Props:**
+- `title` (string, required) - Setting title
+- `subtitle` (string) - Optional description
+- `value` (boolean, required) - Switch state
+- `onValueChange` (function, required) - Handler for switch changes
+- `disabled` (boolean) - Disable switch (default: false)
+
+**Usage:**
+```tsx
+<SettingRow
+  title="Enable Notifications"
+  subtitle="Receive stock level alerts"
+  value={notificationsEnabled}
+  onValueChange={setNotificationsEnabled}
+/>
+```
+
+**Replaces:** ~20-25 lines of View + Text + Switch per instance
+**Used in:** NotificationSettingsScreen (4 instances)
+
+---
+
+#### NumberPicker
+**Purpose:** Number/value picker with left/right arrow buttons.
+
+**Props:**
+- `value` (number | string, required) - Current value to display
+- `onIncrement` (function, required) - Handler for increment
+- `onDecrement` (function, required) - Handler for decrement
+- `label` (string) - Optional label above value
+- `subtitle` (string) - Optional subtitle below value
+- `variant` ('h1' | 'h2' | 'h3' | 'body') - Typography variant (default: 'h2')
+- `style` (ViewStyle) - Custom styles
+
+**Usage:**
+```tsx
+<NumberPicker
+  value={monthlyDay}
+  onIncrement={() => setMonthlyDay(Math.min(31, monthlyDay + 1))}
+  onDecrement={() => setMonthlyDay(Math.max(1, monthlyDay - 1))}
+  subtitle="day of month"
+/>
+```
+
+**Replaces:** ~25-30 lines of arrow buttons + display container per instance
+**Used in:** NotificationSettingsScreen (3 instances)
+
+---
+
+#### Divider
+**Purpose:** Simple horizontal divider line for visual separation.
+
+**Props:**
+- `color` (string) - Divider color (default: Colors.border)
+- `thickness` (number) - Line thickness in pixels (default: 1)
+- `spacing` ('sm' | 'md' | 'lg' | 'none') - Vertical spacing (default: 'md')
+- `style` (ViewStyle) - Custom styles
+
+**Usage:**
+```tsx
+<Divider />
+<Divider color={Colors.primary} thickness={2} spacing="lg" />
+```
+
+**Replaces:** ~5-8 lines of View with height + backgroundColor per instance
+**Used in:** NotificationSettingsScreen (8+ instances), across many screens
+
+---
+
+#### MenuItem
+**Purpose:** Reusable menu item with icon, title, subtitle, and navigation arrow.
+
+**Props:**
+- `icon` (any) - Icon name to display
+- `title` (string) - Main text to display
+- `subtitle` (string, optional) - Secondary text below title
+- `onPress` (() => void) - Callback function when item is pressed
+- `iconColor` (string, optional) - Custom icon color
+- `danger` (boolean, optional) - Display in danger/warning style
+
+**Usage:**
+```tsx
+<MenuItem
+  icon="settings"
+  title="Notification Settings"
+  subtitle="Manage your alerts"
+  onPress={() => navigation.navigate('Settings')}
+/>
+
+<MenuItem
+  icon="trash"
+  title="Delete Account"
+  danger
+  onPress={handleDelete}
+/>
+
+<MenuItem
+  icon="star"
+  title="Premium"
+  iconColor={Colors.gold}
+  onPress={() => navigation.navigate('Premium')}
+/>
+```
+
+**Replaces:** ~18-22 lines of TouchableOpacity + Card + Icon + Typography per instance
+**Used in:** MoreScreen (8 instances)
+
+---
+
 ## Code Reduction Summary
 
 ### Total Lines Saved
@@ -201,8 +313,12 @@ This directory contains reusable UI components that reduce code duplication acro
 - **ScreenHeader**: 8 instances × 32 lines = **~256 lines**
 - **ChipButton/ChipGroup**: 5 instances × 18 lines = **~90 lines**
 - **MetricCard**: 10 instances × 17 lines = **~170 lines**
+- **SettingRow**: 4 instances × 22 lines = **~88 lines**
+- **NumberPicker**: 3 instances × 28 lines = **~84 lines**
+- **Divider**: 15+ instances × 6 lines = **~90 lines**
+- **MenuItem**: 8 instances × 20 lines = **~160 lines**
 
-**Total Duplicate Code Removed: ~1,170 lines**
+**Total Duplicate Code Removed: ~1,592 lines**
 
 ### Benefits
 1. **Consistency**: All screens use the same UI patterns
@@ -227,13 +343,20 @@ components/
 │   ├── BottomSheetModal.tsx   # Bottom sheet modal wrapper
 │   ├── ChipButton.tsx         # Single chip button
 │   ├── ChipGroup.tsx          # Group of chips
-│   └── MetricCard.tsx         # Metric display card
+│   ├── MetricCard.tsx         # Metric display card
+│   ├── SettingRow.tsx         # Settings row with switch
+│   ├── NumberPicker.tsx       # Number picker with arrows
+│   ├── Divider.tsx            # Horizontal divider line
+│   └── MenuItem.tsx           # Menu item with icon and arrow
 └── BaseComponents
     ├── Button.tsx
     ├── Card.tsx
     ├── Typography.tsx
     ├── Icon.tsx
-    └── ...
+    ├── EmptyState.tsx
+    ├── ProductCard.tsx
+    ├── ProductImage.tsx
+    └── StatCard.tsx
 ```
 
 ---

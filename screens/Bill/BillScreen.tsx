@@ -6,10 +6,7 @@ import React from 'react';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import Typography from '../../components/Typography';
-import Icon from '../../components/Icon';
-import Card from '../../components/Card';
-import Button from '../../components/Button';
+import { Typography, Icon, Card, Button } from '../../components';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
 import { widthScale, heightScale, mediumScale } from '../../constants/size';
@@ -697,7 +694,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: Spacing.md,
     right: Spacing.md,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: Colors.overlayLight,
     borderRadius: mediumScale(20),
     padding: Spacing.sm,
   },
@@ -772,7 +769,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: Colors.overlay,
     justifyContent: 'flex-end',
   },
   modalContent: {

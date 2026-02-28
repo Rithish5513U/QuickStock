@@ -1,9 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Image, Animated } from 'react-native';
+import { StyleSheet, View, Animated } from 'react-native';
 import { useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Button from '../components/Button';
-import Typography from '../components/Typography';
+import { Button, Typography, Icon } from '../components';
 import { Colors } from '../constants/colors';
 import { heightScale, mediumScale } from '../constants/size';
 
@@ -72,11 +71,13 @@ export default function WelcomeScreen({ navigation }: any) {
         ]}
       >
         <View style={styles.imageWrapper}>
-          <Image 
-            source={require('../assets/landing-img.jpg')} 
-            resizeMode="cover"
-            style={styles.image}
-          />
+          <View style={styles.iconContainer}>
+            <Icon name="inventory" size={120} color={Colors.primary} />
+          </View>
+          <View style={styles.iconRow}>
+            <Icon name="receipt" size={60} color={Colors.secondary} />
+            <Icon name="shopping-cart" size={60} color={Colors.secondary} />
+          </View>
         </View>
       </Animated.View>
 
@@ -132,9 +133,16 @@ const styles = StyleSheet.create({
     borderRadius: mediumScale(30),
     overflow: 'hidden',
   },
-  image: {
-    width: '100%',
-    height: '100%',
+  iconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: heightScale(20),
+  },
+  iconRow: {
+    flexDirection: 'row',
+    gap: mediumScale(40),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   bottomContainer: {
     flex: 0.35,
@@ -158,7 +166,7 @@ const styles = StyleSheet.create({
     marginTop: heightScale(20)
   },
   getStartedText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: mediumScale(18),
     fontWeight: '600',
   },

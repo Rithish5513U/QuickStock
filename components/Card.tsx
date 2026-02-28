@@ -24,5 +24,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: mediumScale(4),
     elevation: 3,
+    overflow: 'hidden',
   },
 });

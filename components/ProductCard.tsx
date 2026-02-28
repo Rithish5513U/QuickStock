@@ -1,4 +1,4 @@
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Pressable, StyleSheet } from 'react-native';
 import Card from './Card';
 import Typography from './Typography';
 import Icon from './Icon';
@@ -32,64 +32,65 @@ export default function ProductCard({ product, onEdit, onDelete, onPress }: Prod
   const stockStatus = getStockStatus();
 
   return (
-    <Card style={styles.productCard}>
-      <TouchableOpacity 
-        onPress={() => onPress?.(product)}
-        activeOpacity={0.7}
-      >
-        <View style={styles.productRow}>
-          <ProductImage imageUri={product.image} size={widthScale(60)} />
-          
-          <View style={styles.productInfo}>
-            <View style={styles.nameRow}>
-              <View style={styles.nameContainer}>
-                <Typography variant="h3" style={styles.productName}>
-                  {product.name}
-                </Typography>
-                <Typography variant="caption" color={Colors.textLight}>
-                  {product.category}
-                </Typography>
-              </View>
-              <View style={[
-                styles.stockIndicator, 
-                stockStatus === 'green' && styles.stockGreen,
-                stockStatus === 'yellow' && styles.stockYellow,
-                stockStatus === 'red' && styles.stockRed,
-              ]} />
-            </View>
+    <Pressable 
+      onPress={() => onPress?.(product)}
+    >
+      {({ pressed }) => (
+        <Card style={styles.productCard} backgroundColor={pressed ? '#F0F0F0' : '#FFFFFF'}>
+          <View style={styles.productRow}>
+            <ProductImage imageUri={product.image} size={widthScale(60)} />
             
-            <View style={styles.detailsRow}>
-              <View style={styles.productDetailItem}>
-                <Typography variant="caption" color={Colors.textLight}>Stock</Typography>
-                <Typography variant="body" style={styles.productDetailValue}>
-                  {product.currentStock}
-                </Typography>
+            <View style={styles.productInfo}>
+              <View style={styles.nameRow}>
+                <View style={styles.nameContainer}>
+                  <Typography variant="h3" style={styles.productName}>
+                    {product.name}
+                  </Typography>
+                  <Typography variant="caption" color={Colors.textLight}>
+                    {product.category}
+                  </Typography>
+                </View>
+                <View style={[
+                  styles.stockIndicator, 
+                  stockStatus === 'green' && styles.stockGreen,
+                  stockStatus === 'yellow' && styles.stockYellow,
+                  stockStatus === 'red' && styles.stockRed,
+                ]} />
               </View>
-              <View style={styles.productDetailItem}>
-                <Typography variant="caption" color={Colors.textLight}>Price</Typography>
-                <Typography variant="body" style={styles.productDetailValue}>
-                  ${product.buyingPrice.toFixed(2)}
-                </Typography>
-              </View>
-              <View style={styles.productActions}>
-                <TouchableOpacity 
-                  style={styles.actionButton}
-                  onPress={() => onEdit?.(product)}
-                >
-                  <Icon name="edit" size={mediumScale(18)} style={{ tintColor: Colors.primary }} />
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.actionButton}
-                  onPress={() => onDelete?.(product)}
-                >
-                  <Icon name="delete-bin" size={mediumScale(18)} style={{ tintColor: Colors.danger }} />
-                </TouchableOpacity>
+              
+              <View style={styles.detailsRow}>
+                <View style={styles.productDetailItem}>
+                  <Typography variant="caption" color={Colors.textLight}>Stock</Typography>
+                  <Typography variant="body" style={styles.productDetailValue}>
+                    {product.currentStock}
+                  </Typography>
+                </View>
+                <View style={styles.productDetailItem}>
+                  <Typography variant="caption" color={Colors.textLight}>Price</Typography>
+                  <Typography variant="body" style={styles.productDetailValue}>
+                    ${product.buyingPrice.toFixed(2)}
+                  </Typography>
+                </View>
+                <View style={styles.productActions}>
+                  <TouchableOpacity 
+                    style={styles.actionButton}
+                    onPress={() => onEdit?.(product)}
+                  >
+                    <Icon name="edit" size={mediumScale(18)} color={Colors.primary} />
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.actionButton}
+                    onPress={() => onDelete?.(product)}
+                  >
+                    <Icon name="delete-bin" size={mediumScale(18)} color={Colors.danger} />
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </View>
-        </View>
-      </TouchableOpacity>
-    </Card>
+        </Card>
+      )}
+    </Pressable>
   );
 }
 
@@ -118,8 +119,8 @@ const styles = StyleSheet.create({
     fontSize: mediumScale(16),
   },
   stockIndicator: {
-    width: widthScale(12),
-    height: heightScale(12),
+    width: mediumScale(12),
+    height: mediumScale(12),
     borderRadius: mediumScale(6),
     marginLeft: Spacing.sm,
   },

@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.md,
     backgroundColor: Colors.white,
     borderBottomWidth: mediumScale(1),
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: Colors.border,
   },
   backButton: {
     padding: Spacing.xs,

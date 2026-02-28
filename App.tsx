@@ -1,4 +1,4 @@
-import { StyleSheet, View, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, Pressable, useWindowDimensions } from 'react-native';
 import { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -15,7 +15,8 @@ import SelectProductScreen from './screens/Bill/SelectProductScreen';
 import CustomerAnalyticsScreen from './screens/Customers/CustomerAnalyticsScreen';
 import CustomerDetailsScreen from './screens/Customers/CustomerDetailsScreen';
 import MoreScreen from './screens/More/MoreScreen';
-import Icon from './components/Icon';
+import NotificationSettingsScreen from './screens/More/NotificationSettingsScreen';
+import { Icon } from './components';
 import { Colors } from './constants/colors';
 import { heightScale, mediumScale } from './constants/size';
 
@@ -64,12 +65,16 @@ export default function App() {
         <Stack.Screen name="InvoiceHistory" component={InvoiceHistoryScreen} />
         <Stack.Screen name="SelectProduct" component={SelectProductScreen} />
         <Stack.Screen name="CustomerDetails" component={CustomerDetailsScreen} />
+        <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
 
 function MainTabs() {
+  const { width } = useWindowDimensions();
+  const isCompactScreen = width < 380;
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -89,7 +94,7 @@ function MainTabs() {
             iconName = 'hamburger-menu';
           }
 
-          return <Icon name={iconName} size={size} style={{ tintColor: color }} />;
+          return <Icon name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textLight,
@@ -97,12 +102,16 @@ function MainTabs() {
           backgroundColor: Colors.white,
           borderTopWidth: mediumScale(1),
           borderTopColor: '#E0E0E0',
-          height: heightScale(60),
-          paddingBottom: heightScale(8),
-          paddingTop: heightScale(8),
+          height: isCompactScreen ? heightScale(70) : heightScale(64),
+          paddingBottom: isCompactScreen ? heightScale(10) : heightScale(8),
+          paddingTop: isCompactScreen ? heightScale(10) : heightScale(8),
+        },
+        tabBarItemStyle: {
+          paddingHorizontal: isCompactScreen ? mediumScale(1) : mediumScale(2),
         },
         tabBarLabelStyle: {
-          fontSize: mediumScale(12),
+          fontSize: isCompactScreen ? mediumScale(10) : mediumScale(12),
+          lineHeight: isCompactScreen ? mediumScale(12) : mediumScale(14),
           fontWeight: '600',
         },
       })}
@@ -113,13 +122,38 @@ function MainTabs() {
         name="Bill" 
         component={BillScreen}
         options={{
-          tabBarIconStyle: {
-            marginTop: heightScale(-10),
+          tabBarButton: (props) => {
+            const { onPress } = props;
+            return (
+              <Pressable
+                onPress={onPress}
+                style={{
+                  top: -20,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {({ pressed }) => (
+                  <View style={{
+                    width: mediumScale(60),
+                    height: mediumScale(60),
+                    borderRadius: mediumScale(30),
+                    backgroundColor: pressed ? '#0056CC' : Colors.primary,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 8,
+                    elevation: 8,
+                  }}>
+                    <Icon name="create" size={mediumScale(28)} color={Colors.white} />
+                  </View>
+                )}
+              </Pressable>
+            );
           },
-          tabBarLabelStyle: {
-            fontSize: mediumScale(12),
-            fontWeight: '700',
-          },
+          tabBarLabel: '',
         }}
       />
       <Tab.Screen name="Customers" component={CustomerAnalyticsScreen} />

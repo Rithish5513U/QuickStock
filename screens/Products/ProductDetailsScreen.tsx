@@ -1,22 +1,19 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
-import { useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
+import { useNavigation, useRoute, NavigationProp, useFocusEffect } from '@react-navigation/native';
+import React from 'react';
 import { Product, Invoice, InvoiceItem } from '../../models';
 import { ProductService, AnalyticsService } from '../../services';
 import { widthScale, heightScale, mediumScale } from '../../constants/size';
+import { Typography, Icon, Card, Button, ScreenHeader } from '../../components';
+import { Colors } from '../../constants/colors';
+import { Spacing } from '../../constants/spacing';
 
 type RootStackParamList = {
   ProductDetails: { productId: string };
   AddEditProduct: { product?: Product };
 };
-import Typography from '../../components/Typography';
-import Icon from '../../components/Icon';
-import Card from '../../components/Card';
-import Button from '../../components/Button';
-import ScreenHeader from '../../components/ScreenHeader';
-import { Colors } from '../../constants/colors';
-import { Spacing } from '../../constants/spacing';
 
 export default function ProductDetailsScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -26,9 +23,11 @@ export default function ProductDetailsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [transactions, setTransactions] = useState<any[]>([]);
 
-  useEffect(() => {
-    loadProduct();
-  }, [productId]);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadProduct();
+    }, [productId])
+  );
 
   const loadProduct = async () => {
     if (!productId) {

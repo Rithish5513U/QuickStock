@@ -15,12 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Product } from '../../models';
 import { ProductService, CategoryService } from '../../services';
-import Typography from "../../components/Typography";
-import Icon from "../../components/Icon";
-import Button from "../../components/Button";
-import Card from "../../components/Card";
-import FormInput from "../../components/FormInput";
-import BottomSheetModal from "../../components/BottomSheetModal";
+import { Typography, Icon, Button, Card, FormInput, BottomSheetModal } from "../../components";
 import { Colors } from "../../constants/colors";
 import { Spacing } from "../../constants/spacing";
 import { widthScale, heightScale, mediumScale } from '../../constants/size';
@@ -57,6 +52,7 @@ export default function AddEditProductScreen() {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [showScanner, setShowScanner] = useState(false);
   const [scanned, setScanned] = useState(false);
+  const [showImagePicker, setShowImagePicker] = useState(false);
 
   useEffect(() => {
     loadCategories();
@@ -146,11 +142,22 @@ export default function AddEditProductScreen() {
   };
 
   const handleImagePicker = () => {
-    Alert.alert("Product Image", "Choose an option", [
-      { text: "Take Photo", onPress: takePhoto },
-      { text: "Choose from Gallery", onPress: pickImage },
-      { text: "Cancel", style: "cancel" },
-    ]);
+    setShowImagePicker(true);
+  };
+
+  const handleTakePhoto = () => {
+    setShowImagePicker(false);
+    setTimeout(takePhoto, 100);
+  };
+
+  const handlePickImage = () => {
+    setShowImagePicker(false);
+    setTimeout(pickImage, 100);
+  };
+
+  const handleRemoveImage = () => {
+    setShowImagePicker(false);
+    setImage("");
   };
 
   const handleBarcodeScanned = ({ data }: { data: string }) => {
@@ -525,6 +532,65 @@ export default function AddEditProductScreen() {
         </View>
       </Modal>
 
+      {/* Image Picker Modal */}
+      <Modal visible={showImagePicker} animationType="slide" transparent>
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setShowImagePicker(false)}
+        >
+          <View style={styles.imagePickerModal}>
+            <TouchableOpacity 
+              style={styles.imageOption} 
+              onPress={handleTakePhoto}
+            >
+              <Icon name="camera" size={24} color={Colors.primary} />
+              <Typography variant="body" style={styles.imageOptionText}>
+                Take Photo
+              </Typography>
+            </TouchableOpacity>
+
+            <View style={styles.optionDivider} />
+
+            <TouchableOpacity 
+              style={styles.imageOption} 
+              onPress={handlePickImage}
+            >
+              <Icon name="image" size={24} color={Colors.primary} />
+              <Typography variant="body" style={styles.imageOptionText}>
+                Choose from Gallery
+              </Typography>
+            </TouchableOpacity>
+
+            {image && (
+              <>
+                <View style={styles.optionDivider} />
+                <TouchableOpacity 
+                  style={styles.imageOption} 
+                  onPress={handleRemoveImage}
+                >
+                  <Icon name="delete" size={24} color={Colors.danger} />
+                  <Typography variant="body" color={Colors.danger} style={styles.imageOptionText}>
+                    Remove Image
+                  </Typography>
+                </TouchableOpacity>
+              </>
+            )}
+
+            <View style={styles.optionDivider} />
+
+            <TouchableOpacity 
+              style={styles.imageOption} 
+              onPress={() => setShowImagePicker(false)}
+            >
+              <Typography variant="body" style={styles.cancelText}>
+                Cancel
+              </Typography>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       <StatusBar style="dark" />
     </View>
   );
@@ -689,8 +755,39 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: Spacing.md,
     right: Spacing.md,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: Colors.overlayLight,
     borderRadius: mediumScale(20),
     padding: Spacing.sm,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  imagePickerModal: {
+    backgroundColor: Colors.white,
+    borderTopLeftRadius: mediumScale(20),
+    borderTopRightRadius: mediumScale(20),
+    paddingVertical: Spacing.md,
+  },
+  imageOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.md,
+  },
+  imageOptionText: {
+    flex: 1,
+  },
+  optionDivider: {
+    height: mediumScale(1),
+    backgroundColor: Colors.border,
+    marginHorizontal: Spacing.lg,
+  },
+  cancelText: {
+    textAlign: 'center',
+    color: Colors.textLight,
+    fontWeight: '600',
   },
 });

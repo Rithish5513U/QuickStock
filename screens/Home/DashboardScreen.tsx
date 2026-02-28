@@ -1,16 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, ScrollView, TouchableOpacity, RefreshControl, Alert, Dimensions } from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity, Pressable, RefreshControl, Alert, Dimensions } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import { PieChart, BarChart, LineChart } from 'react-native-chart-kit';
-import StatCard from '../../components/StatCard';
-import Card from '../../components/Card';
-import Typography from '../../components/Typography';
-import EmptyState from '../../components/EmptyState';
-import Icon from '../../components/Icon';
-import ProductCard from '../../components/ProductCard';
+import { StatCard, Card, Typography, EmptyState, Icon, ProductCard } from '../../components';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
 import { widthScale, heightScale, mediumScale } from '../../constants/size';
@@ -84,7 +79,7 @@ export default function DashboardScreen({ navigation }: any) {
         categoryMap.set(p.category, (categoryMap.get(p.category) || 0) + 1);
       });
       
-      const chartColors = ['#4A90E2', '#E94B3C', '#6FCF97', '#F2994A', '#9B51E0', '#56CCF2'];
+      const chartColors = [Colors.chartBlue, Colors.chartRed, Colors.chartGreen, Colors.chartOrange, Colors.chartPurple, Colors.chartCyan];
       const categoryData = Array.from(categoryMap.entries()).map(([name, count], index) => ({
         name,
         population: count,
@@ -406,7 +401,7 @@ export default function DashboardScreen({ navigation }: any) {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Icon name="alert" size={20} color={Colors.warning} />
-              <Typography variant="h3" color={Colors.warning} style={styles.sectionTitle}>
+              <Typography variant="h3" color={Colors.warning} style={{ flex: 1 }}>
                 Stock Alerts
               </Typography>
             </View>
@@ -453,34 +448,50 @@ export default function DashboardScreen({ navigation }: any) {
             Quick Actions
           </Typography>
           <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('AddEditProduct' as never)}
+            <View style={styles.sideActions}>
+              <Pressable 
+                onPress={() => navigation.navigate('AddEditProduct' as never)}
+              >
+                {({ pressed }) => (
+                  <Card style={styles.sideActionCard} backgroundColor={pressed ? '#F0F0F0' : '#FFFFFF'}>
+                    <Icon name="add" size={28} color={Colors.primary} />
+                    <Typography variant="caption" color={Colors.primary} style={styles.sideActionText}>
+                      Add Product
+                    </Typography>
+                  </Card>
+                )}
+              </Pressable>
+              
+              <Pressable 
+                onPress={() => navigation.navigate('Customers' as never)}
+              >
+                {({ pressed }) => (
+                  <Card style={styles.sideActionCard} backgroundColor={pressed ? '#F0F0F0' : '#FFFFFF'}>
+                    <Icon name="people" size={28} color={Colors.primary} />
+                    <Typography variant="caption" color={Colors.primary} style={styles.sideActionText}>
+                      Customers
+                    </Typography>
+                  </Card>
+                )}
+              </Pressable>
+            </View>
+            
+            <Pressable 
+              onPress={() => navigation.navigate('Bill' as never)}
+              style={styles.centerActionWrapper}
             >
-              <Card style={styles.actionCard}>
-                <Icon name="add" size={32} color={Colors.primary} />
-                <Typography variant="body" color={Colors.primary} style={styles.actionButtonText}>
-                  Add Product
-                </Typography>
-              </Card>
-            </TouchableOpacity>
-            
-            <TouchableOpacity onPress={() => navigation.navigate('Bill' as never)}>
-              <Card style={styles.actionCard}>
-                <Icon name="receipt" size={32} color={Colors.primary} />
-                <Typography variant="body" color={Colors.primary} style={styles.actionButtonText}>
-                  Create Invoice
-                </Typography>
-              </Card>
-            </TouchableOpacity>
-            
-            <TouchableOpacity onPress={() => navigation.navigate('Stock' as never)}>
-              <Card style={styles.actionCard}>
-                <Icon name="inventory" size={32} color={Colors.primary} />
-                <Typography variant="body" color={Colors.primary} style={styles.actionButtonText}>
-                  Update Stock
-                </Typography>
-              </Card>
-            </TouchableOpacity>
+              {({ pressed }) => (
+                <View style={[
+                  styles.centerActionButton,
+                  { backgroundColor: pressed ? '#0056CC' : Colors.primary }
+                ]}>
+                  <Icon name="receipt" size={36} color={Colors.white} />
+                  <Typography variant="caption" color={Colors.white} style={styles.centerActionText}>
+                    Bill
+                  </Typography>
+                </View>
+              )}
+            </Pressable>
           </View>
         </View>
 
@@ -557,6 +568,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   sectionTitle: {
+    flex: 1,
     marginBottom: Spacing.md,
   },
   alertCard: {
@@ -581,7 +593,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionButtonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    justifyContent: 'space-between',
+  },
+  sideActions: {
+    flex: 1,
     gap: Spacing.sm,
+  },
+  sideActionCard: {
+    alignItems: 'center',
+    padding: Spacing.md,
+  },
+  sideActionText: {
+    fontSize: mediumScale(12),
+    fontWeight: '600',
+    marginTop: Spacing.xs,
+    textAlign: 'center',
+  },
+  centerActionWrapper: {
+    alignItems: 'center',
+  },
+  centerActionButton: {
+    width: widthScale(90),
+    height: widthScale(90),
+    borderRadius: widthScale(45),
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: heightScale(4) },
+    shadowOpacity: 0.3,
+    shadowRadius: mediumScale(8),
+    elevation: 8,
+  },
+  centerActionText: {
+    fontSize: mediumScale(12),
+    fontWeight: '700',
+    marginTop: Spacing.xs,
   },
   actionCard: {
     flexDirection: 'row',

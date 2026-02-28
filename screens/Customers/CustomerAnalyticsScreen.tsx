@@ -1,15 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, ScrollView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Invoice, Customer } from '../../models';
 import { InvoiceService, CustomerService, AnalyticsService } from '../../services';
-import Typography from '../../components/Typography';
-import Icon from '../../components/Icon';
-import Card from '../../components/Card';
-import EmptyState from '../../components/EmptyState';
+import { Typography, Icon, Card, EmptyState, SearchBar } from '../../components';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
 import { widthScale, heightScale, mediumScale } from '../../constants/size';
@@ -133,16 +130,11 @@ export default function CustomerAnalyticsScreen() {
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Icon name="search" size={mediumScale(20)} style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search customers..."
-            placeholderTextColor={Colors.textLight}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
+        <SearchBar
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search customers..."
+        />
       </View>
 
       {/* Sort Options */}
@@ -244,7 +236,7 @@ export default function CustomerAnalyticsScreen() {
 
                 {/* Last Visit */}
                 <View style={styles.lastVisit}>
-                  <Icon name="info" size={mediumScale(14)} style={{ tintColor: Colors.textLight }} />
+                  <Icon name="info" size={mediumScale(14)} color={Colors.textLight} />
                   <Typography variant="caption" color={Colors.textLight}>
                     Last visit: {formatDate(customer.lastVisit)}
                   </Typography>
@@ -289,20 +281,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.xl + heightScale(20),
-    paddingBottom: Spacing.md,
+    padding: Spacing.lg,
+    paddingTop: heightScale(60),
     backgroundColor: Colors.white,
-    borderBottomWidth: mediumScale(1),
-    borderBottomColor: '#E0E0E0',
   },
   statsContainer: {
     flexDirection: 'row',
     backgroundColor: Colors.white,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
-    borderBottomWidth: mediumScale(1),
-    borderBottomColor: '#E0E0E0',
   },
   statBox: {
     flex: 1,
@@ -313,29 +300,11 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     backgroundColor: Colors.white,
   },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.background,
-    borderRadius: mediumScale(12),
-    paddingHorizontal: Spacing.md,
-    height: heightScale(48),
-  },
-  searchIcon: {
-    tintColor: Colors.textLight,
-    marginRight: Spacing.sm,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: mediumScale(16),
-    color: Colors.textPrimary,
-  },
   sortContainer: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     backgroundColor: Colors.white,
-    borderBottomWidth: mediumScale(1),
-    borderBottomColor: '#E0E0E0',
+    marginBottom: Spacing.sm,
   },
   sortButton: {
     paddingHorizontal: Spacing.md,
@@ -376,14 +345,14 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderTopWidth: mediumScale(1),
     borderBottomWidth: mediumScale(1),
-    borderColor: '#E0E0E0',
+    borderColor: Colors.border,
   },
   statItem: {
     alignItems: 'center',
   },
   statDivider: {
     width: widthScale(1),
-    backgroundColor: '#E0E0E0',
+    backgroundColor: Colors.border,
   },
   lastVisit: {
     flexDirection: 'row',

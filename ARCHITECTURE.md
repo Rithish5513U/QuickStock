@@ -95,9 +95,24 @@ Handles all analytics and reporting:
   - `formatDate(dateString)` - Format date (Jan 15, 2024)
   - `formatDateTime(dateString)` - Format date with time
 
+#### NotificationService
+Manages push notifications and scheduling:
+- **Setup:**
+  - `setupNotifications()` - Setup notification configuration for iOS and Android
+  - `requestPermissions()` - Request notification permissions from user
+- **Settings Management:**
+  - `loadSettings()` - Load notification settings from storage
+  - `saveSettings(settings)` - Save notification settings to storage
+- **Scheduling:**
+  - `scheduleNotifications(settings)` - Schedule notifications based on settings
+  - `cancelAllNotifications()` - Cancel all scheduled notifications
+  - `saveAndSchedule(settings)` - Complete workflow: save + schedule
+- **Utilities:**
+  - `getScheduledNotifications()` - Get all scheduled notifications (debug)
+
 **Usage:**
 ```typescript
-import { ProductService, InvoiceService, AnalyticsService } from '../services';
+import { ProductService, InvoiceService, AnalyticsService, NotificationService } from '../services';
 
 // Get all products
 const products = await ProductService.getAll();
@@ -109,6 +124,108 @@ await ProductService.recordSale(productId, quantity, sellingPrice, costPrice);
 const transactions = await AnalyticsService.getProductTransactions(productId);
 ```
 
+### 🎨 Components (`/components`)
+Reusable UI components following atomic design principles. All components are exported via barrel export pattern.
+
+**Component Categories:**
+
+#### Base Components
+Core UI building blocks:
+- `Button`, `Card`, `Typography`, `Icon`
+- `EmptyState`, `ProductCard`, `ProductImage`, `StatCard`
+
+#### Form Components
+Input and search components:
+- `FormInput` - Label + TextInput + validation (~15 lines saved per use)
+- `SearchBar` - Search input with icon (~12 lines saved per use)
+
+#### Layout Components
+Complex reusable layouts for common UI patterns:
+- `ScreenHeader` - Screen header with back button (~32 lines saved per use)
+- `BottomSheetModal` - Bottom sheet modal wrapper (~45 lines saved per use)
+- `ChipButton` - Single chip button (~8 lines saved per use)
+- `ChipGroup` - Group of chips (~18 lines saved per use)
+- `MetricCard` - Metric display card (~17 lines saved per use)
+- `SettingRow` - Settings row with switch toggle (~22 lines saved per use)
+- `NumberPicker` - Number picker with arrows (~28 lines saved per use)
+- `Divider` - Horizontal divider line (~6 lines saved per use)
+- `MenuItem` - Menu item with icon and arrow (~20 lines saved per use)
+
+**Usage:**
+```typescript
+// Single import for all components
+import { Typography, Button, Card, SettingRow, Divider, MenuItem } from '../components';
+
+// Use in screens
+<SettingRow 
+  title="Enable Notifications" 
+  subtitle="Receive stock alerts"
+  value={enabled} 
+  onValueChange={setEnabled} 
+/>
+
+<MenuItem
+  icon="settings"
+  title="Notification Settings"
+  onPress={() => navigation.navigate('Settings')}
+/>
+```
+
+**Benefits:**
+- ✅ ~1,592 lines of duplicate code eliminated
+- ✅ Consistent UI across the app
+- ✅ Easy to maintain and update
+- ✅ Centralized component documentation in `COMPONENTS_GUIDE.md`
+
+### 🎨 Theme System (`/constants`)
+Centralized design system ensuring visual consistency.
+
+#### Colors (`/constants/colors.ts`)
+Complete color palette with 28 predefined colors:
+
+**Brand Colors:**
+- `primary`, `secondary`, `accent`
+
+**Neutral Colors:**
+- `white`, `black`, `background`, `surface`, `light`
+
+**Text Colors:**
+- `textPrimary`, `textSecondary`, `textLight`
+
+**Status Colors:**
+- `success`, `error`, `warning`, `info`
+- `stockCritical`, `stockLow`, `stockOk`
+
+**UI Colors:**
+- `border` - Consistent border color (#E0E0E0)
+- `overlay` - Modal overlays (rgba(0, 0, 0, 0.5))
+- `overlayLight` - Lighter overlays (rgba(0, 0, 0, 0.3))
+- `gold` - Ratings and highlights (#FFB800)
+
+**Chart Colors:**
+- `chartBlue`, `chartRed`, `chartGreen`, `chartOrange`, `chartPurple`, `chartCyan`
+
+**Usage:**
+```typescript
+import { Colors } from '../constants/colors';
+
+// Always use Colors constants, never hardcode
+backgroundColor: Colors.primary,  // ✅ Correct
+backgroundColor: '#007AFF',       // ❌ Wrong
+```
+
+#### Spacing (`/constants/spacing.ts`)
+Consistent spacing scale: `xs`, `sm`, `md`, `lg`, `xl`, `xxl`
+
+#### Size Utilities (`/constants/size.ts`)
+Responsive scaling functions: `widthScale()`, `heightScale()`, `mediumScale()`
+
+**Theme Benefits:**
+- ✅ Single source of truth for all colors
+- ✅ Easy to rebrand entire app
+- ✅ Consistent visual language
+- ✅ No hardcoded colors in components
+
 ### 🎨 Screens (`/screens`)
 UI layer - only responsible for rendering and user interaction. All logic is delegated to services.
 
@@ -118,6 +235,8 @@ UI layer - only responsible for rendering and user interaction. All logic is del
 - Keep screens focused on UI state and rendering
 - No business logic calculations in screens
 - Handle loading states and errors gracefully
+- Always use Colors constants for styling
+- Reuse components from `/components` folder
 
 ### 🛠️ Utils (`/utils`)
 Legacy storage utilities. **Deprecated** - use services instead.
@@ -249,6 +368,8 @@ describe('ProductService', () => {
 
 ## Future Enhancements
 
+- [x] **Centralized theme system with Colors constants**
+- [x] **Reusable component library (~1,432 lines eliminated)**
 - [ ] Add TypeScript strict mode
 - [ ] Implement caching layer in services
 - [ ] Add validation service for form inputs
@@ -257,6 +378,12 @@ describe('ProductService', () => {
 - [ ] Implement offline-first sync strategy
 - [ ] Add unit tests for all services
 - [ ] Add integration tests for screens
+
+## Documentation
+
+- **ARCHITECTURE.md** (this file) - System architecture and service layer
+- **COMPONENTS_GUIDE.md** - Component library documentation
+- **SERVICES_GUIDE.md** - Service usage guide
 
 ## Contributing
 
@@ -268,7 +395,7 @@ When adding new features:
 
 ---
 
-**Last Updated:** January 2024  
+**Last Updated:** January 2026  
 **Architecture Pattern:** Clean Architecture with Service Layer  
 **State Management:** React Hooks (useState, useEffect)  
 **Data Persistence:** AsyncStorage  

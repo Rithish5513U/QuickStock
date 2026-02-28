@@ -8,10 +8,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Invoice, InvoiceItem } from '../../models';
 import { InvoiceService, AnalyticsService } from '../../services';
-import Typography from '../../components/Typography';
-import Icon from '../../components/Icon';
-import Card from '../../components/Card';
-import EmptyState from '../../components/EmptyState';
+import { Typography, Icon, Card, EmptyState, ScreenHeader } from '../../components';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
 import { widthScale, heightScale, mediumScale } from '../../constants/size';
@@ -231,12 +228,10 @@ export default function CustomerDetailsScreen() {
   if (invoices.length === 0) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Icon name="arrow-left" size={mediumScale(24)} />
-          </TouchableOpacity>
-          <Typography variant="h2">Customer Not Found</Typography>
-        </View>
+        <ScreenHeader
+          title="Customer Not Found"
+          onBack={() => navigation.goBack()}
+        />
         <EmptyState 
           title="Customer Not Found"
           message="No invoices found for this customer."
@@ -250,15 +245,11 @@ export default function CustomerDetailsScreen() {
       <StatusBar style="dark" />
       
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-left" size={mediumScale(24)} />
-        </TouchableOpacity>
-        <View style={styles.headerTitle}>
-          <Typography variant="h2">{customerName}</Typography>
-          <Typography variant="caption" color={Colors.textLight}>{customerPhone}</Typography>
-        </View>
-      </View>
+      <ScreenHeader
+        title={customerName}
+        subtitle={customerPhone}
+        onBack={() => navigation.goBack()}
+      />
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Summary Stats */}
@@ -344,13 +335,13 @@ export default function CustomerDetailsScreen() {
                     onPress={() => handleDownloadInvoice(invoice)}
                     style={styles.actionButton}
                   >
-                    <Icon name="send" size={mediumScale(20)} style={{ tintColor: Colors.primary }} />
+                    <Icon name="send" size={mediumScale(20)} color={Colors.primary} />
                   </TouchableOpacity>
                   <TouchableOpacity 
                     onPress={() => handleDeleteInvoice(invoice)}
                     style={styles.actionButton}
                   >
-                    <Icon name="close" size={mediumScale(20)} style={{ tintColor: Colors.danger }} />
+                    <Icon name="close" size={mediumScale(20)} color={Colors.danger} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -392,23 +383,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.xl + heightScale(20),
-    paddingBottom: Spacing.md,
-    backgroundColor: Colors.white,
-    borderBottomWidth: mediumScale(1),
-    borderBottomColor: '#E0E0E0',
-  },
-  backButton: {
-    padding: Spacing.xs,
-    marginRight: Spacing.sm,
-  },
-  headerTitle: {
-    flex: 1,
   },
   scrollView: {
     flex: 1,
@@ -454,7 +428,7 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
     paddingTop: Spacing.sm,
     borderTopWidth: mediumScale(1),
-    borderTopColor: '#E0E0E0',
+    borderTopColor: Colors.border,
   },
   productStat: {
     flex: 1,
@@ -479,7 +453,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     borderTopWidth: mediumScale(1),
     borderBottomWidth: mediumScale(1),
-    borderColor: '#E0E0E0',
+    borderColor: Colors.border,
     gap: Spacing.xs,
   },
   invoiceItem: {

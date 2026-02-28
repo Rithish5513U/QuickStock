@@ -164,6 +164,53 @@ await CategoryService.update('Old Name', 'New Name');
 const exists = CategoryService.exists(categories, 'Electronics'); // true/false
 ```
 
+### Notifications
+
+```typescript
+import { NotificationService } from '../services';
+
+// Setup (call once on app start - works on both iOS and Android)
+await NotificationService.setupNotifications();
+
+// Load saved settings
+const settings = await NotificationService.loadSettings();
+// Returns: NotificationSettings | null
+
+// Save settings
+const settingsToSave = {
+  enabled: true,
+  frequency: 'daily', // 'daily' | 'weekly' | 'monthly' | 'yearly'
+  days: ['mon', 'tue', 'wed', 'thu', 'fri'], // for weekly
+  time: '9:0', // HH:MM format
+  alertTypes: {
+    criticalStock: true,
+    lowStock: true,
+    outOfStock: true,
+  },
+  monthlyDay: 1, // 1-31 (for monthly)
+  yearlyMonth: 1, // 1-12 (for yearly)
+  yearlyDay: 1, // 1-31 (for yearly)
+};
+await NotificationService.saveSettings(settingsToSave);
+
+// Request permissions
+const hasPermission = await NotificationService.requestPermissions();
+// Shows system dialog, returns true if granted
+
+// Schedule notifications based on settings
+await NotificationService.scheduleNotifications(settings);
+
+// Cancel all notifications
+await NotificationService.cancelAllNotifications();
+
+// Complete workflow (recommended)
+const success = await NotificationService.saveAndSchedule(settingsToSave);
+// Handles permissions, saving, canceling old, and scheduling new
+
+// Debug: Get all scheduled notifications
+const scheduled = await NotificationService.getScheduledNotifications();
+```
+
 ## Complete Example: Bill Screen
 
 ```typescript
